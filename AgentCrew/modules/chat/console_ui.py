@@ -37,6 +37,9 @@ RICH_STYLE_GREEN_BOLD = Style(color="green", bold=True)
 RICH_STYLE_BLUE_BOLD = Style(color="blue", bold=True)
 RICH_STYLE_RED_BOLD = Style(color="red", bold=True)
 
+RICH_STYLE_FILE_ACCENT_BOLD = Style(color="bright_cyan", bold=True)
+RICH_STYLE_FILE_PATH = Style(color="bright_white", bold=False)
+
 CODE_THEME = "lightbulb"
 
 
@@ -73,6 +76,8 @@ class ConsoleUI(Observer):
         self._input_thread = None
         self._input_stop_event = Event()
         self._current_prompt_session = None
+
+        self._added_files = []
 
     def listen(self, event: str, data: Any = None):
         """
@@ -118,6 +123,7 @@ class ConsoleUI(Observer):
             self.display_message(
                 Text("🎮 Chat history cleared.", style=RICH_STYLE_YELLOW_BOLD)
             )
+            self._added_files = []
         elif event == "exit_requested":
             self.display_message(
                 Text("🎮 Ending chat session. Goodbye!", style=RICH_STYLE_YELLOW_BOLD)
@@ -171,9 +177,7 @@ class ConsoleUI(Observer):
             self.display_divider()
         elif event == "file_processed":
             self.stop_loading_animation()  # Stop loading on first chunk
-            file_text = Text("Processed file: ", style=RICH_STYLE_YELLOW)
-            file_text.append(data["file_path"])
-            self.display_message(file_text)
+            self._added_files.append(data["file_path"])
         elif event == "consolidation_completed":
             self.display_consolidation_result(data)
         elif event == "conversations_listed":
@@ -999,6 +1003,7 @@ class ConsoleUI(Observer):
                 style=RICH_STYLE_YELLOW,
             )
             self.console.print(title)
+            self._display_added_files()
             self._start_input_thread()
         else:
             time.sleep(0.2)  # prevent conflict
@@ -1081,6 +1086,7 @@ class ConsoleUI(Observer):
             style=RICH_STYLE_YELLOW,
         )
         self.console.print(title)
+        self._display_added_files()
         prompt = Text("👤 YOU: ", style=RICH_STYLE_BLUE_BOLD)
         self.console.print(prompt, end="")
 
@@ -1184,6 +1190,23 @@ class ConsoleUI(Observer):
                 buffer.cursor_down()
 
         return kb
+
+    def _display_added_files(self):
+        """Display added files with special styling just above the user input."""
+        if not self._added_files:
+            return
+
+        file_display = Text("📎 Added files: ", style=RICH_STYLE_FILE_ACCENT_BOLD)
+        for i, file_path in enumerate(self._added_files):
+            if i > 0:
+                file_display.append(", ", style=RICH_STYLE_FILE_PATH)
+            if ' ' in file_path:
+                file_display.append(f'"{file_path}"', style=RICH_STYLE_FILE_PATH)
+            else:
+                file_display.append(file_path, style=RICH_STYLE_FILE_PATH)
+
+        self.console.print(file_display)
+        print() 
 
     def print_welcome_message(self):
         """Print the welcome message for the chat."""

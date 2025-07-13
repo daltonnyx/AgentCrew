@@ -10,6 +10,8 @@ from AgentCrew.modules.chat.consolidation import ConversationConsolidator
 from AgentCrew.modules.config import ConfigManagement
 from AgentCrew.modules.mcpclient import MCPService
 import shlex
+from rich.text import Text
+from rich.style import Style
 
 
 @dataclass
@@ -503,7 +505,7 @@ class CommandProcessor:
                 )
             self.message_handler._notify(
                 "system_message",
-                f"Successfully processed {len(processed_files)} files: {', '.join(processed_files)}",
+                f"✅ Successfully processed {len(processed_files)} files: {', '.join(processed_files)}",
             )
 
         return CommandResult(handled=True, clear_flag=True)
