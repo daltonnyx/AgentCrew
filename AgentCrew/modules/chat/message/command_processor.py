@@ -10,9 +10,6 @@ from AgentCrew.modules.chat.consolidation import ConversationConsolidator
 from AgentCrew.modules.config import ConfigManagement
 from AgentCrew.modules.mcpclient import MCPService
 import shlex
-from rich.text import Text
-from rich.style import Style
-
 
 @dataclass
 class CommandResult:
