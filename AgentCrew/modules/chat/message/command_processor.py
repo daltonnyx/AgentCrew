@@ -11,7 +11,6 @@ from AgentCrew.modules.config import ConfigManagement
 from AgentCrew.modules.mcpclient import MCPService
 import shlex
 
-
 @dataclass
 class CommandResult:
     """Result of command processing."""
@@ -503,7 +502,7 @@ class CommandProcessor:
                 )
             self.message_handler._notify(
                 "system_message",
-                f"Successfully processed {len(processed_files)} files: {', '.join(processed_files)}",
+                f"✅ Successfully processed {len(processed_files)} files: {', '.join(processed_files)}",
             )
 
         return CommandResult(handled=True, clear_flag=True)
