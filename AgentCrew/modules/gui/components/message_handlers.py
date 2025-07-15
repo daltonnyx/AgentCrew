@@ -68,6 +68,7 @@ class MessageEventHandler:
         if self.chat_window.current_response_bubble:
             # Finalize streaming and ensure full content is rendered
             self.chat_window.current_response_bubble.raw_text_buffer = data
+            self.chat_window.current_response_bubble.raw_text = data
             self.chat_window.current_response_bubble._finalize_streaming()
             self.chat_window.current_response_bubble.message_index = (
                 len(self.chat_window.message_handler.streamline_messages) - 1
