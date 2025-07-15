@@ -174,7 +174,7 @@ class InputComponents:
             return
         # Find the start of the path
         text_to_cursor = text[:position]
-        path_match = re.search(r"((~|\.{1,2})?/[^\s]*|~)$", text_to_cursor)
+        path_match = re.search(r"((~|\.{1,2})?/[^\s/]*|~)$", text_to_cursor)
 
         if path_match:
             path_start = path_match.start()
