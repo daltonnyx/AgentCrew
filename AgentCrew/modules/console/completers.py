@@ -5,6 +5,8 @@ from AgentCrew.modules.llm.model_registry import ModelRegistry
 import os
 import re
 
+COMPLETER_PATTERN = re.compile(r"[A-z0-9-_.]+")
+
 
 class JumpCompleter(Completer):
     """Completer that shows available conversation turns when typing /jump command."""
@@ -17,7 +19,9 @@ class JumpCompleter(Completer):
 
         # Only provide completions for the /jump command
         if text.startswith("/jump "):
-            word_before_cursor = document.get_word_before_cursor()
+            word_before_cursor = document.get_word_before_cursor(
+                pattern=COMPLETER_PATTERN
+            )
 
             conversation_turns = (
                 self.message_handler.conversation_turns if self.message_handler else []
@@ -47,7 +51,9 @@ class ModelCompleter(Completer):
 
         # Only provide completions for the /model command
         if text.startswith("/model "):
-            word_before_cursor = document.get_word_before_cursor()
+            word_before_cursor = document.get_word_before_cursor(
+                pattern=COMPLETER_PATTERN
+            )
 
             # Get all available models from the registry
             all_models = []
@@ -79,7 +85,9 @@ class AgentCompleter(Completer):
 
         # Only provide completions for the /agent command
         if text.startswith("/agent "):
-            word_before_cursor = document.get_word_before_cursor()
+            word_before_cursor = document.get_word_before_cursor(
+                pattern=COMPLETER_PATTERN
+            )
 
             # Get all available agents from the manager
             all_agents = []
@@ -189,7 +197,9 @@ class MCPCompleter(Completer):
     def get_completions(self, document, complete_event):
         text = document.text
         if text.startswith("/mcp "):
-            word_before_cursor = document.get_word_before_cursor()
+            word_before_cursor = document.get_word_before_cursor(
+                pattern=COMPLETER_PATTERN
+            )
             # Collect all prompts from all servers
             if self.mcp_service and hasattr(self.mcp_service, "server_prompts"):
                 for server_id, prompts in self.mcp_service.server_prompts.items():
