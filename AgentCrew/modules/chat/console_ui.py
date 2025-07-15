@@ -1197,16 +1197,9 @@ class ConsoleUI(Observer):
             return
 
         file_display = Text("📎 Added files: ", style=RICH_STYLE_FILE_ACCENT_BOLD)
-        for i, file_path in enumerate(self._added_files):
-            if i > 0:
-                file_display.append(", ", style=RICH_STYLE_FILE_PATH)
-            if ' ' in file_path:
-                file_display.append(f'"{file_path}"', style=RICH_STYLE_FILE_PATH)
-            else:
-                file_display.append(file_path, style=RICH_STYLE_FILE_PATH)
+        file_display.append(f"{', '.join(self._added_files)}", style=RICH_STYLE_FILE_PATH)
 
         self.console.print(file_display)
-        print() 
 
     def print_welcome_message(self):
         """Print the welcome message for the chat."""
