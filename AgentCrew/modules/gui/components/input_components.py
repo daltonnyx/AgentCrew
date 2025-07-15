@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt, QStringListModel
 from PySide6.QtGui import QTextCursor
 import qtawesome as qta
-from AgentCrew.modules.chat.completers import DirectoryListingCompleter
+from AgentCrew.modules.console.completers import DirectoryListingCompleter
 from .completers import GuiChatCompleter
 
 

@@ -14,7 +14,6 @@ from rich.markdown import Markdown
 from rich.text import Text
 from rich.panel import Panel
 from rich.live import Live
-from rich.style import Style
 from prompt_toolkit import PromptSession
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
@@ -23,24 +22,22 @@ import AgentCrew
 
 from AgentCrew.modules.chat.message_handler import MessageHandler, Observer
 from AgentCrew.modules import logger
-from AgentCrew.modules.chat.completers import ChatCompleter
+from AgentCrew.modules.console.completers import ChatCompleter
 
-# Rich styles
-RICH_STYLE_YELLOW = Style(color="yellow", bold=False)
-RICH_STYLE_GREEN = Style(color="green", bold=False)
-RICH_STYLE_BLUE = Style(color="blue", bold=False)
-RICH_STYLE_RED = Style(color="red", bold=False)
-RICH_STYLE_GRAY = Style(color="grey66", bold=False)
-
-RICH_STYLE_YELLOW_BOLD = Style(color="yellow", bold=True)
-RICH_STYLE_GREEN_BOLD = Style(color="green", bold=True)
-RICH_STYLE_BLUE_BOLD = Style(color="blue", bold=True)
-RICH_STYLE_RED_BOLD = Style(color="red", bold=True)
-
-RICH_STYLE_FILE_ACCENT_BOLD = Style(color="bright_cyan", bold=True)
-RICH_STYLE_FILE_PATH = Style(color="bright_white", bold=False)
-
-CODE_THEME = "lightbulb"
+from .constants import (
+    RICH_STYLE_YELLOW,
+    RICH_STYLE_GREEN,
+    RICH_STYLE_BLUE,
+    RICH_STYLE_RED,
+    RICH_STYLE_GRAY,
+    RICH_STYLE_YELLOW_BOLD,
+    RICH_STYLE_GREEN_BOLD,
+    RICH_STYLE_BLUE_BOLD,
+    RICH_STYLE_RED_BOLD,
+    RICH_STYLE_FILE_ACCENT_BOLD,
+    RICH_STYLE_FILE_PATH,
+    CODE_THEME,
+)
 
 
 class ConsoleUI(Observer):
@@ -1197,7 +1194,9 @@ class ConsoleUI(Observer):
             return
 
         file_display = Text("📎 Added files: ", style=RICH_STYLE_FILE_ACCENT_BOLD)
-        file_display.append(f"{', '.join(self._added_files)}", style=RICH_STYLE_FILE_PATH)
+        file_display.append(
+            f"{', '.join(self._added_files)}", style=RICH_STYLE_FILE_PATH
+        )
 
         self.console.print(file_display)
 

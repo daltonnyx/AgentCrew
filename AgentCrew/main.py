@@ -10,7 +10,7 @@ import requests
 import time
 import subprocess
 import platform
-from AgentCrew.modules.chat import ConsoleUI
+from AgentCrew.modules.console import ConsoleUI
 from AgentCrew.modules.gui import ChatWindow
 from AgentCrew.modules.chat import MessageHandler
 from AgentCrew.modules.web_search import TavilySearchService
