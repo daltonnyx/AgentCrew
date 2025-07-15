@@ -17,6 +17,7 @@ from rich.console import Console
 from rich.text import Text
 
 from AgentCrew.modules import logger
+from AgentCrew.modules.chat import MessageHandler
 from .completers import ChatCompleter
 from .constants import (
     RICH_STYLE_YELLOW,
@@ -29,7 +30,9 @@ from .constants import (
 class InputHandler:
     """Handles user input in a separate thread and manages key bindings."""
 
-    def __init__(self, console: Console, message_handler, display_handlers):
+    def __init__(
+        self, console: Console, message_handler: MessageHandler, display_handlers
+    ):
         """Initialize the input handler."""
         self.console = console
         self.message_handler = message_handler
@@ -82,17 +85,16 @@ class InputHandler:
                 event.app.exit("__EXIT__")
             else:
                 self._last_ctrl_c_time = current_time
-                if hasattr(self.message_handler, "live") and self.message_handler.live:
-                    if self.message_handler.stream_generator:
-                        try:
-                            asyncio.run(self.message_handler.stream_generator.aclose())
-                        except RuntimeError as e:
-                            logger.warning(f"Error closing stream generator: {e}")
-                        except Exception as e:
-                            logger.warning(f"Exception closing stream generator: {e}")
-                        finally:
-                            self.message_handler.stop_streaming = True
-                            self.message_handler.stream_generator = None
+                if self.message_handler.stream_generator:
+                    try:
+                        asyncio.run(self.message_handler.stream_generator.aclose())
+                    except RuntimeError as e:
+                        logger.warning(f"Error closing stream generator: {e}")
+                    except Exception as e:
+                        logger.warning(f"Exception closing stream generator: {e}")
+                    finally:
+                        self.message_handler.stop_streaming = True
+                        self.message_handler.stream_generator = None
 
                 self.console.print(
                     Text(

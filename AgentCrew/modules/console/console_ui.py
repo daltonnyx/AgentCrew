@@ -60,7 +60,7 @@ class ConsoleUI(Observer):
         self.input_handler = InputHandler(
             self.console, self.message_handler, self.display_handlers
         )
-        self.ui_effects = UIEffects(self.console)
+        self.ui_effects = UIEffects(self.console, self.message_handler)
         self.confirmation_handler = ConfirmationHandler(
             self.console, self.input_handler
         )

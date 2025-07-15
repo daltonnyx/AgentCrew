@@ -12,18 +12,20 @@ from rich.live import Live
 from rich.markdown import Markdown
 
 from .constants import CODE_THEME
+from AgentCrew.modules.chat import MessageHandler
 
 
 class UIEffects:
     """Handles UI effects like loading animations and live displays."""
 
-    def __init__(self, console: Console):
+    def __init__(self, console: Console, message_handler: MessageHandler):
         """Initialize UI effects with a console instance."""
         self.console = console
         self.live = None
         self._live_text_data = ""
         self._loading_stop_event = None
         self._loading_thread = None
+        self.message_handler = message_handler
 
     def _loading_animation(self, stop_event):
         """Display a loading animation in the terminal."""
@@ -95,7 +97,7 @@ class UIEffects:
     def update_live_display(self, chunk: str):
         """Update the live display with a new chunk of the response."""
         if not self.live:
-            return
+            self.start_streaming_response(self.message_handler.agent.name)
 
         updated_text = chunk
         self._live_text_data = updated_text
