@@ -309,7 +309,6 @@ class ConsoleUI(Observer):
                 try:
                     # Get user input (now in separate thread)
                     self.stop_loading_animation()  # Stop if any
-                    self.input_handler.clear_buffer()
                     user_input = self.get_user_input()
 
                     # Handle list command directly

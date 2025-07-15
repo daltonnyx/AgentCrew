@@ -19,6 +19,7 @@ from rich.text import Text
 from AgentCrew.modules import logger
 from AgentCrew.modules.chat import MessageHandler
 from .completers import ChatCompleter
+from .display_handlers import DisplayHandlers
 from .constants import (
     RICH_STYLE_YELLOW,
     RICH_STYLE_YELLOW_BOLD,
@@ -31,7 +32,10 @@ class InputHandler:
     """Handles user input in a separate thread and manages key bindings."""
 
     def __init__(
-        self, console: Console, message_handler: MessageHandler, display_handlers
+        self,
+        console: Console,
+        message_handler: MessageHandler,
+        display_handlers: DisplayHandlers,
     ):
         """Initialize the input handler."""
         self.console = console
@@ -86,7 +90,10 @@ class InputHandler:
                 event.app.exit("__EXIT__")
             else:
                 self._last_ctrl_c_time = current_time
-                if self.message_handler.stream_generator:
+                if (
+                    hasattr(self.message_handler, "stream_generator")
+                    and self.message_handler.stream_generator
+                ):
                     try:
                         asyncio.run(self.message_handler.stream_generator.aclose())
                     except RuntimeError as e:
@@ -96,17 +103,21 @@ class InputHandler:
                     finally:
                         self.message_handler.stop_streaming = True
                         self.message_handler.stream_generator = None
-
-                self.console.print(
-                    Text(
-                        "\nPress Ctrl+C again within 2 seconds to exit.",
-                        style=RICH_STYLE_YELLOW,
+                else:
+                    self.console.print(
+                        Text(
+                            "\nPress Ctrl+C again within 2 seconds to exit.",
+                            style=RICH_STYLE_YELLOW,
+                        )
                     )
-                )
-                self.display_handlers.print_prompt_prefix(
-                    self.message_handler.agent.name,
-                    self.message_handler.agent.get_model(),
-                )
+                    self.display_handlers.print_prompt_prefix(
+                        self.message_handler.agent.name,
+                        self.message_handler.agent.get_model(),
+                    )
+                    time.sleep(0.2)
+                    prompt = Text("👤 YOU: ", style=RICH_STYLE_BLUE)
+                    self.console.print(prompt, end="")
+                    self.clear_buffer()
 
         @kb.add(Keys.Up)
         def _(event):
@@ -153,8 +164,9 @@ class InputHandler:
 
     def clear_buffer(self):
         if self._current_prompt_session:
-            self._current_prompt_session.message = HTML("<ansiblue>👤 YOU:</ansiblue> ")
             self._current_prompt_session.app.current_buffer.reset()
+            self._current_prompt_session.message = HTML("<ansiblue>👤 YOU:</ansiblue> ")
+            self._current_prompt_session.app.invalidate()
 
     def _input_thread_worker(self):
         """Worker thread for handling user input."""
@@ -251,10 +263,11 @@ class InputHandler:
             self.display_handlers.display_added_files()
             self._start_input_thread()
         else:
-            time.sleep(0.2)  # prevent conflict
             self.display_handlers.print_prompt_prefix(
                 self.message_handler.agent.name, self.message_handler.agent.get_model()
             )
+            time.sleep(0.2)  # prevent conflict
+            self.clear_buffer()
 
         # Wait for input while allowing events to be processed
         while True:

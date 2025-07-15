@@ -317,8 +317,6 @@ class DisplayHandlers:
         )
         self.console.print(title)
         self.display_added_files()
-        prompt = Text("👤 YOU: ", style=RICH_STYLE_BLUE_BOLD)
-        self.console.print(prompt, end="")
 
     def add_file(self, file_path: str):
         """Add a file to the added files list."""
