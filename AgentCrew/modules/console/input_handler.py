@@ -175,6 +175,7 @@ class InputHandler:
                 session = PromptSession(
                     key_bindings=self.kb,
                     completer=ChatCompleter(self.message_handler),
+                    refresh_interval=0.3,
                 )
                 self._current_prompt_session = session
 
@@ -266,7 +267,7 @@ class InputHandler:
             self.display_handlers.print_prompt_prefix(
                 self.message_handler.agent.name, self.message_handler.agent.get_model()
             )
-            time.sleep(0.2)  # prevent conflict
+            time.sleep(0.4)  # prevent conflict
             self.clear_buffer()
 
         # Wait for input while allowing events to be processed

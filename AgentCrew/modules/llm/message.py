@@ -503,8 +503,10 @@ class MessageTransformer:
                 openai_msg["role"] = "user"
 
             # Handle content
-            if "content" in msg:
+            if "content" in msg and isinstance(msg.get("content", ""), List):
                 openai_msg["content"] = list(msg["content"])
+            else:
+                openai_msg["content"] = msg.get("content", "")
 
             # Handle tool calls
             if "tool_calls" in msg:

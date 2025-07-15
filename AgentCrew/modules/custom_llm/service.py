@@ -236,7 +236,7 @@ class CustomLLMService(OpenAIService):
 
                     tool_uses.append(
                         {
-                            "id": tool_call.id,
+                            "id": f"toolu_{function.name}_{len(tool_uses)}",
                             "name": function.name,
                             "input": json.loads(function.arguments),
                             "type": tool_call.type,
@@ -270,7 +270,7 @@ class CustomLLMService(OpenAIService):
                     tool_data = json.loads(tool_call_content)
                     tool_uses.append(
                         {
-                            "id": f"call_{len(tool_uses)}",  # Generate an ID
+                            "id": f"toolu_{len(tool_uses)}",  # Generate an ID
                             "name": tool_data.get("name", ""),
                             "input": tool_data.get("arguments", {}),
                             "type": "function",
@@ -386,7 +386,7 @@ class CustomLLMService(OpenAIService):
                         # Create a new tool call entry
                         tool_uses.append(
                             {
-                                "id": tool_call_delta.id
+                                "id": f"toolu_{len(tool_uses)}"
                                 if hasattr(tool_call_delta, "id")
                                 else None,
                                 "name": getattr(tool_call_delta.function, "name", "")
@@ -400,7 +400,7 @@ class CustomLLMService(OpenAIService):
 
                     # Update existing tool call with new data
                     if hasattr(tool_call_delta, "id") and tool_call_delta.id:
-                        tool_uses[tool_call_index]["id"] = tool_call_delta.id
+                        tool_uses[tool_call_index]["id"] = f"toolu_{len(tool_uses)}"
 
                     if hasattr(tool_call_delta, "function"):
                         if (

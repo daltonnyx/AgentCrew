@@ -304,7 +304,7 @@ class GroqService(BaseLLMService):
 
                     tool_uses.append(
                         {
-                            "id": tool_call.id,
+                            "id": f"toolu_{function.name}_{len(tool_uses)}",
                             "name": function.name,
                             "input": json.loads(function.arguments),
                             "type": tool_call.type,
