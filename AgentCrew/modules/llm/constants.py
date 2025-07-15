@@ -166,6 +166,16 @@ _GROQ_MODELS = [
         input_token_price_1m=0.29,
         output_token_price_1m=0.39,
     ),
+    Model(
+        id="moonshotai/kimi-k2-instruct",
+        provider="groq",
+        name="Kimi K2 Instruct",
+        description="Kimi K2 is Moonshot AI's state-of-the-art Mixture-of-Experts (MoE) language model with 1 trillion total parameters and 32 billion activated parameters",
+        capabilities=["tool_use", "stream"],
+        default=False,
+        input_token_price_1m=1.0,
+        output_token_price_1m=3.0,
+    ),
 ]
 
 _GOOGLE_MODELS = [
@@ -217,15 +227,6 @@ _DEEPINFRA_MODELS = [
         capabilities=["text-generation", "tool_use", "stream"],
         input_token_price_1m=0.1,
         output_token_price_1m=0.2,
-    ),
-    Model(
-        id="microsoft/Phi-4-multimodal-instruct",
-        provider="deepinfra",
-        name="Phi 4",
-        description="Phi-4-multimodal-instruct is a lightweight open multimodal foundation model that leverages the language, vision, and speech research and datasets used for Phi-3.5 and 4.0 models.",
-        capabilities=["text-generation", "vision"],
-        input_token_price_1m=0.05,
-        output_token_price_1m=0.1,
     ),
     Model(
         id="Qwen/Qwen2.5-72B-Instruct",
@@ -280,6 +281,15 @@ _DEEPINFRA_MODELS = [
         capabilities=["text-generation", "tool_use", "thinking", "stream"],
         input_token_price_1m=0.5,
         output_token_price_1m=2.18,
+    ),
+    Model(
+        id="moonshotai/Kimi-K2-Instruct",
+        provider="deepinfra",
+        name="Kimi K2 Instruct",
+        description="Kimi K2 is a large-scale Mixture-of-Experts (MoE) language model developed by Moonshot AI, featuring 1 trillion total parameters with 32 billion active per forward pass",
+        capabilities=["text-generation", "tool_use"],
+        input_token_price_1m=0.55,
+        output_token_price_1m=2.22,
     ),
 ]
 _GITHUB_COPILOT_MODELS = [

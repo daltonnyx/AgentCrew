@@ -282,10 +282,10 @@ class MessageBubble(QFrame):
         """Create and show context menu with standard text actions plus Copy as Markdown."""
         menu = QMenu(self)
 
-        copy_action = menu.addAction("Copy as plain text")
+        copy_action = menu.addAction("Copy Selected as plain text")
         copy_action.triggered.connect(self._copy_selected_text)
 
-        copy_html_action = menu.addAction("Copy as HTML")
+        copy_html_action = menu.addAction("Copy Selected as HTML")
         copy_html_action.triggered.connect(self._copy_selected_html)
 
         if not self.message_label.hasSelectedText():
