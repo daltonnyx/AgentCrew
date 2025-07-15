@@ -11,6 +11,7 @@ from AgentCrew.modules.config import ConfigManagement
 from AgentCrew.modules.mcpclient import MCPService
 import shlex
 
+
 @dataclass
 class CommandResult:
     """Result of command processing."""

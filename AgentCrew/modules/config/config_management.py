@@ -230,7 +230,11 @@ class ConfigManagement:
     def read_global_config_data(self) -> Dict[str, Any]:
         """Reads data from the global config.json file."""
         config_path = self._get_global_config_file_path()
-        default_config = {"api_keys": {}, "auto_approval_tools": [], "global_settings": {"theme": "dark", "yolo_mode": False}}
+        default_config = {
+            "api_keys": {},
+            "auto_approval_tools": [],
+            "global_settings": {"theme": "dark", "yolo_mode": False},
+        }
         try:
             if not os.path.exists(config_path):
                 return default_config
@@ -244,7 +248,9 @@ class ConfigManagement:
                 # Ensure api_keys key exists and is a dict
                 if "api_keys" not in data or not isinstance(data.get("api_keys"), dict):
                     data["api_keys"] = {}
-                if "auto_approval_tools" not in data or not isinstance(data.get("auto_approval_tools"), list):
+                if "auto_approval_tools" not in data or not isinstance(
+                    data.get("auto_approval_tools"), list
+                ):
                     data["auto_approval_tools"] = []
                 return data
         except json.JSONDecodeError:
@@ -596,4 +602,6 @@ class ConfigManagement:
             self.write_global_config_data(global_config)
         except Exception as e:
             action = "add" if add else "remove"
-            logger.warning(f"Warning: Failed to {action} tool {tool_name} from auto-approval list: {e}")
+            logger.warning(
+                f"Warning: Failed to {action} tool {tool_name} from auto-approval list: {e}"
+            )
