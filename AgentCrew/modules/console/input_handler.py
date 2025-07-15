@@ -81,7 +81,7 @@ class InputHandler:
             current_time = time.time()
             if (
                 hasattr(self, "_last_ctrl_c_time")
-                and current_time - self._last_ctrl_c_time < 2
+                and current_time - self._last_ctrl_c_time <= 1
             ):
                 self.console.print(
                     Text("\n🎮 Confirmed exit. Goodbye!", style=RICH_STYLE_YELLOW_BOLD)
@@ -106,7 +106,7 @@ class InputHandler:
                 else:
                     self.console.print(
                         Text(
-                            "\nPress Ctrl+C again within 2 seconds to exit.",
+                            "\nPress Ctrl+C again within 1 second to exit.",
                             style=RICH_STYLE_YELLOW,
                         )
                     )
@@ -114,9 +114,9 @@ class InputHandler:
                         self.message_handler.agent.name,
                         self.message_handler.agent.get_model(),
                     )
-                    time.sleep(0.2)
                     prompt = Text("👤 YOU: ", style=RICH_STYLE_BLUE)
                     self.console.print(prompt, end="")
+                    time.sleep(0.2)
                     self.clear_buffer()
 
         @kb.add(Keys.Up)
@@ -291,7 +291,7 @@ class InputHandler:
                 elif user_input == "__INTERRUPT__":
                     self.console.print(
                         Text(
-                            "\n🎮 Chat interrupted. Press Ctrl+C again within 2 seconds to exit.",
+                            "\n🎮 Chat interrupted. Press Ctrl+C again within 1 second to exit.",
                             style=RICH_STYLE_YELLOW_BOLD,
                         )
                     )
