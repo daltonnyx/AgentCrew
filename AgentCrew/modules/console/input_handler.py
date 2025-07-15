@@ -44,6 +44,7 @@ class InputHandler:
         self._input_stop_event = Event()
         self._current_prompt_session = None
         self._last_ctrl_c_time = 0
+        self.is_message_processing = False
 
         # Set up key bindings
         self.kb = self._setup_key_bindings()
@@ -56,7 +57,7 @@ class InputHandler:
         @kb.add("escape", "enter")
         def _(event):
             """Submit on Ctrl+S."""
-            if event.current_buffer.text.strip():
+            if event.current_buffer.text.strip() and not self.is_message_processing:
                 event.current_buffer.validate_and_handle()
 
         @kb.add(Keys.Enter)
@@ -150,6 +151,11 @@ class InputHandler:
 
         return kb
 
+    def clear_buffer(self):
+        if self._current_prompt_session:
+            self._current_prompt_session.message = HTML("<ansiblue>👤 YOU:</ansiblue> ")
+            self._current_prompt_session.app.current_buffer.reset()
+
     def _input_thread_worker(self):
         """Worker thread for handling user input."""
         while not self._input_stop_event.is_set():
@@ -161,7 +167,11 @@ class InputHandler:
                 self._current_prompt_session = session
 
                 # Create a dynamic prompt that includes agent and model info using HTML formatting
-                prompt_text = HTML("<ansiblue>👤 YOU:</ansiblue> ")
+                prompt_text = (
+                    HTML("<ansiblue>👤 YOU:</ansiblue> ")
+                    if not self.is_message_processing
+                    else ""
+                )
                 user_input = session.prompt(prompt_text)
 
                 # Reset history position after submission
@@ -169,6 +179,7 @@ class InputHandler:
 
                 # Put the input in the queue
                 self._input_queue.put(user_input)
+                time.sleep(0.1)  # Allow time for input processing
 
             except KeyboardInterrupt:
                 # Handle Ctrl+C in input thread

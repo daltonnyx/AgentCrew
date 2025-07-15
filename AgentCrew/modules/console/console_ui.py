@@ -309,6 +309,7 @@ class ConsoleUI(Observer):
                 try:
                     # Get user input (now in separate thread)
                     self.stop_loading_animation()  # Stop if any
+                    self.input_handler.clear_buffer()
                     user_input = self.get_user_input()
 
                     # Handle list command directly
@@ -367,10 +368,13 @@ class ConsoleUI(Observer):
                     if not self.message_handler.agent.history:
                         continue
 
+                    self.input_handler.is_message_processing = True
                     # Get assistant response
                     assistant_response, input_tokens, output_tokens = asyncio.run(
                         self.message_handler.get_assistant_response()
                     )
+
+                    self.input_handler.is_message_processing = False
 
                     # Ensure loading animation is stopped
                     self.stop_loading_animation()
@@ -386,6 +390,7 @@ class ConsoleUI(Observer):
                         )
                 except KeyboardInterrupt:
                     self._handle_keyboard_interrupt()
+                    self.input_handler.is_message_processing = False
                     continue  # Continue the loop instead of breaking
         finally:
             # Clean up input thread when exiting
