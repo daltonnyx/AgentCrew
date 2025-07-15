@@ -129,7 +129,7 @@ class InputComponents:
             return
 
         # Look for path patterns that should trigger completion
-        path_match = re.search(r"((~|\.{1,2})?/[^\s]*|~)$", text_to_cursor)
+        path_match = re.search(r"((~|\.{1,2})?/[^\s/]*|~)$", text_to_cursor)
 
         if path_match:
             path = path_match.group(0)
