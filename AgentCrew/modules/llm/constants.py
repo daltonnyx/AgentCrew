@@ -287,7 +287,7 @@ _DEEPINFRA_MODELS = [
         provider="deepinfra",
         name="Kimi K2 Instruct",
         description="Kimi K2 is a large-scale Mixture-of-Experts (MoE) language model developed by Moonshot AI, featuring 1 trillion total parameters with 32 billion active per forward pass",
-        capabilities=["text-generation", "tool_use"],
+        capabilities=["text-generation", "tool_use", "stream"],
         input_token_price_1m=0.55,
         output_token_price_1m=2.22,
     ),
