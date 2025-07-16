@@ -181,7 +181,7 @@ class ConsoleUI(Observer):
             self.display_handlers.display_message(preview_text)
         elif event == "thinking_completed":
             self.display_handlers.display_divider()
-        elif event == "file_processed":
+        elif event == "file_processing":
             self.ui_effects.stop_loading_animation()  # Stop loading on first chunk
             self.display_handlers.add_file(data["file_path"])
         elif event == "consolidation_completed":

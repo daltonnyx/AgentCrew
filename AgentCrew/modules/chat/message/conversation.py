@@ -26,6 +26,7 @@ class ConversationManager:
                     "ContextPersistenceService not initialized in MessageHandler."
                 )
 
+            self.message_handler._queued_attached_files = []
             self.message_handler.current_conversation_id = (
                 self.message_handler.persistent_service.start_conversation()
             )

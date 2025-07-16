@@ -194,7 +194,6 @@ class ChatWindow(QMainWindow, Observer):
         self.current_file_bubble = None
         self.thinking_content = ""
         self.expecting_response = False
-        self._is_file_processing = False
         self._delegated_user_input = None
 
         # Track session cost
@@ -262,11 +261,6 @@ class ChatWindow(QMainWindow, Observer):
         self.current_response_bubble = None
         self.current_response_container = None
 
-        # Send the request to worker thread via signal
-        # This is thread-safe and doesn't require QMetaObject.invokeMethod
-        if self._is_file_processing:
-            self._delegated_user_input = user_input
-            return
         # Update status bar
         self.display_status_message("Processing your message...")
         self.llm_worker.process_request.emit(user_input)
@@ -504,13 +498,11 @@ class ChatWindow(QMainWindow, Observer):
             if self.current_file_bubble:
                 self.chat_components.remove_messages_after(self.current_file_bubble)
                 self.current_file_bubble = None
-            self._is_file_processing = False
             self.display_error(data)
         elif event == "consolidation_completed":
             self.conversation_components.display_consolidation(data)
             self.ui_state_manager.set_input_controls_enabled(True)
         elif event == "file_processing":
-            self._is_file_processing = True
             file_path = data["file_path"]
             self.current_file_bubble = self.chat_components.append_file(
                 file_path, is_user=True
@@ -518,12 +510,7 @@ class ChatWindow(QMainWindow, Observer):
             if not self.loading_conversation:
                 self.ui_state_manager.set_input_controls_enabled(True)
         elif event == "file_processed":
-            if self._is_file_processing:
-                if self._delegated_user_input:
-                    self.llm_worker.process_request.emit(self._delegated_user_input)
-                    self._delegated_user_input = None
-                self.current_file_bubble = None
-                self._is_file_processing = False
+            self.current_file_bubble = None
         elif event == "image_generated":
             self.chat_components.append_file(data, False, True)
         # Command-related events are now handled by command_handler above

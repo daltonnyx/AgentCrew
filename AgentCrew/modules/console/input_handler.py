@@ -192,7 +192,7 @@ class InputHandler:
 
                 # Put the input in the queue
                 self._input_queue.put(user_input)
-                time.sleep(0.1)  # Allow time for input processing
+                time.sleep(0.4)  # Allow time for input processing
 
             except KeyboardInterrupt:
                 # Handle Ctrl+C in input thread
@@ -267,7 +267,6 @@ class InputHandler:
             self.display_handlers.print_prompt_prefix(
                 self.message_handler.agent.name, self.message_handler.agent.get_model()
             )
-            time.sleep(0.4)  # prevent conflict
             self.clear_buffer()
 
         # Wait for input while allowing events to be processed

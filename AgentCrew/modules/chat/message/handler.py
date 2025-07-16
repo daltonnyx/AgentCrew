@@ -1,4 +1,6 @@
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
+import os
+import shlex
 import traceback
 import time
 
@@ -55,6 +57,7 @@ class MessageHandler(Observable):
         self.current_user_input_idx = -1
         self.last_assisstant_response_idx = -1
         self.file_handler: Optional[FileHandler] = None
+        self._queued_attached_files = []
         self.stop_streaming = False
         self.streamline_messages = []
         self.current_conversation_id: Optional[str] = None  # ID for persistence
@@ -75,6 +78,18 @@ class MessageHandler(Observable):
         )
         self.streamline_messages.extend(std_msg)
 
+    def _prepare_files_processing(self, file_command):
+        self._queued_attached_files.append(file_command)
+        file_paths_str: str = file_command[6:].strip()
+        file_paths: List[str] = [
+            os.path.expanduser(path.strip())
+            for path in shlex.split(file_paths_str)
+            if path.strip()
+        ]
+
+        for file_path in file_paths:
+            self._notify("file_processing", {"file_path": file_path})
+
     async def process_user_input(
         self,
         user_input: str,
@@ -89,6 +104,10 @@ class MessageHandler(Observable):
             Tuple of (exit_flag, clear_flag)
         """
         self.history_manager.add_entry(user_input)
+
+        if user_input.startswith("/file "):
+            self._prepare_files_processing(user_input)
+            return False, True
 
         # Process commands first
         command_result = await self.command_processor.process_command(user_input)
@@ -122,6 +141,13 @@ class MessageHandler(Observable):
         #                     ],
         #                 }
         #             )
+
+        # Delays file processing until user send message
+
+        while len(self._queued_attached_files) > 0:
+            file_command = self._queued_attached_files.pop(0)
+            await self.command_processor.process_command(file_command)
+
         # Add regular text message
         self._messages_append(
             {"role": "user", "content": [{"type": "text", "text": user_input}]}

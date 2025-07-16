@@ -458,7 +458,7 @@ class CommandProcessor:
 
         # Process each file
         for file_path in file_paths:
-            self.message_handler._notify("file_processing", {"file_path": file_path})
+            # self.message_handler._notify("file_processing", {"file_path": file_path})
 
             # Process file with the file handling service
             if self.message_handler.file_handler is None:
