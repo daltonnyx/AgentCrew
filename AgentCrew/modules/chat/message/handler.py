@@ -146,7 +146,9 @@ class MessageHandler(Observable):
 
         while len(self._queued_attached_files) > 0:
             file_command = self._queued_attached_files.pop(0)
-            await self.command_processor.process_command(f"/file {file_command}")
+            await self.command_processor.process_command(
+                f"/file {shlex.quote(file_command)}"
+            )
 
         # Add regular text message
         self._messages_append(
