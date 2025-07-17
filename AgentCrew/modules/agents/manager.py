@@ -117,6 +117,13 @@ class AgentManager:
                     )
             # Activate the new agent
             if self.current_agent:
+                if isinstance(self.current_agent, LocalAgent):
+                    from AgentCrew.modules.mcpclient.manager import MCPSessionManager
+
+                    mcp_manager = MCPSessionManager.get_instance()
+                    if mcp_manager.initialized:
+                        mcp_manager.initialize_for_agent(self.current_agent.name)
+
                 self.current_agent.activate()
 
             return True

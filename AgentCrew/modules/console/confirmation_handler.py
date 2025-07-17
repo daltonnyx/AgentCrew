@@ -80,7 +80,7 @@ class ConfirmationHandler:
                 )
                 approved_text = Text(
                     f"✓ Approved all future calls to '{tool_use['name']}' for this session.",
-                    style=RICH_STYLE_YELLOW,
+                    style=RICH_STYLE_GREEN,
                 )
                 self.console.print(approved_text)
                 break

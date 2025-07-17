@@ -46,8 +46,6 @@ class LocalAgent(BaseAgent):
             set()
         )  # Set of tool names that are registered with the LLM
 
-        self.register_tools()
-
     def _extract_tool_name(self, tool_def: Any) -> str:
         """
         Extract tool name from definition regardless of format.
@@ -210,6 +208,7 @@ class LocalAgent(BaseAgent):
         if not self.llm:
             return False
 
+        self.register_tools()
         self._register_tools_with_llm()
         system_prompt = self.get_system_prompt()
         if self.custom_system_prompt:
@@ -237,6 +236,7 @@ class LocalAgent(BaseAgent):
             return False
 
         self._clear_tools_from_llm()
+        self.tool_definitions = {}
         self.is_active = False
         return True
 

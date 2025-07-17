@@ -77,13 +77,22 @@ class MCPConfigManager:
             logger.error(f"Error loading MCP configuration: {e}")
             return {}
 
-    def get_enabled_servers(self) -> Dict[str, MCPServerConfig]:
+    def get_enabled_servers(
+        self, agent_name: Optional[str] = None
+    ) -> Dict[str, MCPServerConfig]:
         """
         Get all enabled server configurations.
 
         Returns:
             Dictionary of enabled server configurations.
         """
+        if agent_name:
+            return {
+                server_id: config
+                for server_id, config in self.configs.items()
+                if agent_name in config.enabledForAgents
+            }
+
         return {
             server_id: config
             for server_id, config in self.configs.items()

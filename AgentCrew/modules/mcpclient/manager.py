@@ -1,3 +1,4 @@
+from typing import Optional
 from .config import MCPConfigManager
 from AgentCrew.modules.mcpclient import MCPService
 from AgentCrew.modules import logger
@@ -40,7 +41,7 @@ class MCPSessionManager:
         # This call will block until initialize_servers_async is scheduled and returns.
         # The actual connections will happen in background tasks within MCPService.
         try:
-            self.mcp_service._run_async(self.initialize_servers_async())
+            # self.mcp_service._run_async(self.initialize_servers_async())
             self.initialized = True
             logger.info("MCPSessionManager: Initialization process started.")
         except Exception as e:
@@ -49,14 +50,28 @@ class MCPSessionManager:
             self.mcp_service.stop()
             self.initialized = False  # Ensure it's marked as not initialized
 
-    async def initialize_servers_async(self) -> None:
+    def initialize_for_agent(self, agent_name) -> None:
+        if not self.initialized:
+            logger.error("MCPSessionManager: Has not initialized.")
+            return
+
+        try:
+            self.mcp_service._run_async(
+                self.mcp_service.shutdown_all_server_connections()
+            )
+            self.mcp_service._run_async(self.initialize_servers_async(agent_name))
+            logger.info("MCPSessionManager: Initialization process started.")
+        except Exception as e:
+            logger.error(f"MCPSessionManager: Error during async initialization: {e}")
+
+    async def initialize_servers_async(self, agent_name: Optional[str] = None) -> None:
         """
         Asynchronously starts the connection management for all enabled MCP servers.
         This method is intended to be run on the MCPService's event loop.
         """
         # Load server configurations
         self.config_manager.load_config()  # Ensure configs are loaded
-        enabled_servers = self.config_manager.get_enabled_servers()
+        enabled_servers = self.config_manager.get_enabled_servers(agent_name)
 
         if not enabled_servers:
             logger.info(

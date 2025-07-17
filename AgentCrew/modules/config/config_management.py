@@ -6,7 +6,6 @@ from datetime import datetime
 from AgentCrew.modules import logger
 
 from AgentCrew.modules.agents import AgentManager
-from AgentCrew.modules.mcpclient import MCPSessionManager
 
 
 class ConfigManagement:
@@ -329,7 +328,6 @@ class ConfigManagement:
             config.update_config(config_data, merge=False)
             config.save_config()
             config.reload_agents_from_config()
-            config.reload_mcp_from_config()
         except FileNotFoundError:
             # Create directory if it doesn't exist
             os.makedirs(os.path.dirname(agents_config_path), exist_ok=True)
@@ -362,17 +360,9 @@ class ConfigManagement:
             existing_agent = agent_manager.get_local_agent(agent_cfg["name"])
             system_prompt = agent_cfg.get("system_prompt", "")
             if existing_agent:
-                was_active = False
-                if existing_agent.is_active:
-                    was_active = True
-                    existing_agent.deactivate()
                 existing_agent.tools = agent_cfg.get("tools", [])
                 existing_agent.set_system_prompt(system_prompt)
                 existing_agent.temperature = agent_cfg.get("temperature", 0.4)
-                existing_agent.tool_definitions = {}
-                existing_agent.register_tools()
-                if was_active:
-                    existing_agent.activate()
             # New Agent
             else:
                 clone_agent = agent_manager.get_current_agent()
@@ -448,15 +438,8 @@ class ConfigManagement:
             with open(mcp_config_path, "w", encoding="utf-8") as f:
                 json.dump(config_data, f, indent=2)
             self.reload_agents_from_config()
-            self.reload_mcp_from_config()
         except Exception as e:
             raise ValueError(f"Error writing MCP configuration: {str(e)}")
-
-    def reload_mcp_from_config(self):
-        session_manager = MCPSessionManager.get_instance()
-        session_manager.cleanup()
-        session_manager = MCPSessionManager.force_new_instance()
-        session_manager.initialize()
 
     def read_custom_llm_providers_config(self) -> List[Dict[str, Any]]:
         """
