@@ -31,10 +31,10 @@ class AgentManager:
         """
         try:
             if config_path.endswith(".toml"):
-                with open(config_path, "r") as file:
+                with open(config_path, "r", encoding="utf-8") as file:
                     config = toml.load(file)
             elif config_path.endswith(".json"):
-                with open(config_path, "r") as file:
+                with open(config_path, "r", encoding="utf-8") as file:
                     config = json.load(file)
             else:
                 raise ValueError(

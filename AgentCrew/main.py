@@ -400,7 +400,7 @@ Current date: {current_date}
 tools = ["memory", "clipboard", "web_search", "code_analysis"]
 """
 
-            with open(config_path, "w+") as f:
+            with open(config_path, "w+", encoding="utf-8") as f:
                 f.write(default_config)
 
             click.echo(f"Created default agent configuration at {config_path}")
