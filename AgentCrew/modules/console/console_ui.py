@@ -184,6 +184,8 @@ class ConsoleUI(Observer):
         elif event == "file_processing":
             self.ui_effects.stop_loading_animation()  # Stop loading on first chunk
             self.display_handlers.add_file(data["file_path"])
+        elif event == "file_dropped":
+            self.display_handlers._added_files.remove(data["file_path"])
         elif event == "consolidation_completed":
             self.display_handlers.display_consolidation_result(data)
         elif event == "conversations_listed":

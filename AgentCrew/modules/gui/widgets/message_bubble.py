@@ -35,16 +35,19 @@ class MessageBubble(QFrame):
         agent_name="ASSISTANT",
         parent=None,
         message_index=None,
-        is_thinking=False,  # Add this parameter
-        is_consolidated=False,  # Add this parameter for consolidated messages
+        is_thinking=False,
+        is_consolidated=False,
     ):
         super().__init__(parent)
 
         # Store message index for rollback functionality
         self.message_index = message_index
         self.is_user = is_user
-        self.is_thinking = is_thinking  # Store thinking state
-        self.is_consolidated = is_consolidated  # Store consolidated state
+        self.is_thinking = is_thinking
+        self.is_consolidated = is_consolidated
+        self.file_path = None
+        self.is_file_processed = False
+        self.remove_button = None
 
         # Initialize style provider
         self.style_provider = StyleProvider()
@@ -72,27 +75,17 @@ class MessageBubble(QFrame):
         else:  # Assistant bubble
             self.setStyleSheet(self.style_provider.get_assistant_bubble_style())
 
-        # This setAutoFillBackground(True) might not be necessary if QFrame style is set
-        # self.setAutoFillBackground(True) # You can test if this is needed
-
-        # Create layout
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 10, 10, 10)
 
         # Add sender label - Use agent_name for non-user messages
         label_text = "YOU:" if is_user else f"{agent_name}:"
         if is_thinking:
-            label_text = (
-                f"{agent_name}'s THINKING:"  # Special label for thinking content
-            )
+            label_text = f"{agent_name}'s THINKING:"
         elif is_consolidated:
-            label_text = (
-                "CONVERSATION SUMMARY:"  # Special label for consolidated content
-            )
+            label_text = "CONVERSATION SUMMARY:"
         elif is_consolidated:
-            label_text = (
-                "CONVERSATION SUMMARY:"  # Special label for consolidated content
-            )
+            label_text = "CONVERSATION SUMMARY:"
 
         sender_label = QLabel(label_text)
         if is_user:
@@ -176,6 +169,8 @@ class MessageBubble(QFrame):
             rollback_button.hide()
             self.rollback_button = rollback_button
 
+        # For file bubbles, add remove button functionality
+
         if not self.is_consolidated:
             # Create consolidated button with icon only
             consolidated_icon = qta.icon("fa6s.wand-magic-sparkles", color="white")
@@ -201,35 +196,63 @@ class MessageBubble(QFrame):
         original_leave_event = self.leaveEvent
 
         def enter_event_wrapper(event):
-            if self.rollback_button or self.consolidated_button:
+            if self.rollback_button or self.consolidated_button or self.remove_button:
                 # Position buttons in the top right corner with spacing
                 button_width = 30
                 button_height = 30
                 spacing = 5
+                button_count = 0
 
-                is_has_consolidate = False
+                # Count visible buttons to calculate positions
                 if self.consolidated_button:
-                    # Position consolidated button first (rightmost)
+                    button_count += 1
+                if self.rollback_button:
+                    button_count += 1
+                if self.remove_button and not self.is_file_processed:
+                    button_count += 1
+
+                current_position = 0
+
+                # Position consolidated button first (rightmost)
+                if self.consolidated_button:
                     self.consolidated_button.setGeometry(
-                        self.width() - button_width - 5,
+                        self.width()
+                        - (button_width * (current_position + 1))
+                        - (spacing * current_position)
+                        - 5,
                         5,
                         button_width,
                         button_height,
                     )
                     self.consolidated_button.show()
-                    is_has_consolidate = True
+                    current_position += 1
 
+                # Position rollback button
                 if self.rollback_button:
-                    # Position rollback button to the left of consolidated button
                     self.rollback_button.setGeometry(
-                        self.width() - (button_width * 2) - spacing - 5
-                        if is_has_consolidate
-                        else self.width() - button_width - 5,
+                        self.width()
+                        - (button_width * (current_position + 1))
+                        - (spacing * current_position)
+                        - 5,
                         5,
                         button_width,
                         button_height,
                     )
                     self.rollback_button.show()
+                    current_position += 1
+
+                # Position remove button (only show if file not processed)
+                if self.remove_button and not self.is_file_processed:
+                    self.remove_button.setGeometry(
+                        self.width()
+                        - (button_width * (current_position + 1))
+                        - (spacing * current_position)
+                        - 5,
+                        5,
+                        button_width,
+                        button_height,
+                    )
+                    self.remove_button.show()
 
             if original_enter_event:
                 original_enter_event(event)
@@ -239,6 +262,8 @@ class MessageBubble(QFrame):
                 self.rollback_button.hide()
             if self.consolidated_button:
                 self.consolidated_button.hide()
+            if self.remove_button:
+                self.remove_button.hide()
             if original_leave_event:
                 original_leave_event(event)
 
@@ -252,27 +277,54 @@ class MessageBubble(QFrame):
             button_width = 30
             button_height = 30
             spacing = 5
+            current_position = 0
+
+            # Position consolidated button first (rightmost)
             if hasattr(self, "consolidated_button") and self.consolidated_button:
-                # Position consolidated button first (rightmost)
                 self.consolidated_button.setGeometry(
-                    self.width() - button_width - 5,
+                    self.width()
+                    - (button_width * (current_position + 1))
+                    - (spacing * current_position)
+                    - 5,
                     5,
                     button_width,
                     button_height,
                 )
+                current_position += 1
 
+            # Position rollback button
             if (
                 hasattr(self, "rollback_button")
                 and self.rollback_button
                 and self.rollback_button.isVisible()
             ):
-                # Position rollback button to the left of consolidated button
                 self.rollback_button.setGeometry(
-                    self.width() - (button_width * 2) - spacing - 5,
+                    self.width()
+                    - (button_width * (current_position + 1))
+                    - (spacing * current_position)
+                    - 5,
                     5,
                     button_width,
                     button_height,
                 )
+                current_position += 1
+
+            # Position remove button
+            if (
+                hasattr(self, "remove_button")
+                and self.remove_button
+                and self.remove_button.isVisible()
+            ):
+                self.remove_button.setGeometry(
+                    self.width()
+                    - (button_width * (current_position + 1))
+                    - (spacing * current_position)
+                    - 5,
+                    5,
+                    button_width,
+                    button_height,
+                )
+
             if original_resize_event:
                 original_resize_event(event)
 
@@ -498,6 +550,25 @@ class MessageBubble(QFrame):
             self.append_text(f"File not found: {file_path}")
             return
 
+        self.file_path = file_path
+
+        if self.file_path is not None:
+            self.setMouseTracking(True)
+
+            # Create remove button with icon
+            remove_icon = qta.icon("fa6s.trash", color="white")
+
+            remove_button = QPushButton(remove_icon, "", self)
+            remove_button.setToolTip("Remove file from processing queue")
+            remove_font = remove_button.font()
+            remove_font.setPixelSize(12)
+            remove_button.setFont(remove_font)
+            remove_button.setStyleSheet(
+                self.style_provider.get_rollback_button_style()  # Reuse the same style
+            )
+            remove_button.hide()
+            self.remove_button = remove_button
+
         # Create a container for the file display
         file_container = QFrame(self)
         file_layout = QVBoxLayout(file_container)
@@ -617,6 +688,16 @@ class MessageBubble(QFrame):
         )
         # Insert header at position 1, just after the sender label
         self.layout().insertWidget(1, header_label)
+
+    def mark_file_processed(self):
+        """Mark the file as processed and disable the remove button."""
+        self.is_file_processed = True
+        if self.remove_button:
+            self.remove_button.hide()
+            self.remove_button.setEnabled(False)
+            self.remove_button.setToolTip(
+                "File has been processed and cannot be removed"
+            )
 
     def display_base64_img(self, data: str):
         """

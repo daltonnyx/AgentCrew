@@ -98,6 +98,12 @@ class ChatComponents:
         else:
             message_bubble.display_file(file_path)
 
+        # Connect remove button if it exists
+        if message_bubble.remove_button:
+            message_bubble.remove_button.clicked.connect(
+                lambda: self._handle_file_remove(message_bubble)
+            )
+
         if is_user:
             container_layout.addStretch(1)  # Push to left
             container_layout.addWidget(message_bubble, 1)
@@ -278,3 +284,48 @@ class ChatComponents:
         self.chat_window.current_response_bubble = None
         self.chat_window.current_response_container = None
         self.chat_window.expecting_response = False
+
+    def _handle_file_remove(self, message_bubble):
+        """Handle removal of a file from the processing queue."""
+        try:
+            if message_bubble.file_path:
+                # Use the chat window's worker to process the drop command
+                self.chat_window.llm_worker.process_request.emit(
+                    f"/drop {message_bubble.file_path}"
+                )
+
+                # Remove the message bubble from the UI immediately
+                self._remove_file_bubble(message_bubble)
+
+        except Exception as e:
+            print(f"Error removing file: {e}")
+
+    def _remove_file_bubble(self, message_bubble):
+        """Remove a specific file bubble from the chat UI."""
+        # Find the container that holds this message bubble
+        for i in range(self.chat_window.chat_layout.count()):
+            item = self.chat_window.chat_layout.itemAt(i)
+            if item and item.widget():
+                # Check if this widget contains our message bubble
+                from AgentCrew.modules.gui.widgets.message_bubble import MessageBubble
+
+                if message_bubble in item.widget().findChildren(MessageBubble):
+                    # Remove the container
+                    container = self.chat_window.chat_layout.takeAt(i)
+                    if container.widget():
+                        container.widget().deleteLater()
+                    break
+
+    def mark_file_processed(self, file_path):
+        """Mark a file as processed in all relevant file bubbles."""
+        # Find all file bubbles with matching file path and mark them as processed
+        for i in range(self.chat_window.chat_layout.count()):
+            item = self.chat_window.chat_layout.itemAt(i)
+            if item and item.widget():
+                # Find message bubbles in this container
+                from AgentCrew.modules.gui.widgets.message_bubble import MessageBubble
+
+                message_bubbles = item.widget().findChildren(MessageBubble)
+                for bubble in message_bubbles:
+                    if hasattr(bubble, "file_path") and bubble.file_path == file_path:
+                        bubble.mark_file_processed()

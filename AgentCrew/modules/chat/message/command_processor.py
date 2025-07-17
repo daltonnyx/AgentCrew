@@ -105,6 +105,10 @@ class CommandProcessor:
         elif user_input.startswith("/file "):
             return self._handle_file_command(user_input)
 
+        # Drop command
+        elif user_input.startswith("/drop "):
+            return self._handle_drop_command(user_input)
+
         # Not a command
         return CommandResult(handled=False)
 
@@ -507,3 +511,50 @@ class CommandProcessor:
             )
 
         return CommandResult(handled=True, clear_flag=True)
+
+    def _handle_drop_command(self, user_input: str) -> CommandResult:
+        """Handle drop command to remove queued files."""
+        # Extract file identifier from user input
+        file_path = user_input[6:].strip()  # Remove "/drop " prefix
+
+        if not file_path:
+            # Show available files if no argument provided
+            if not self.message_handler._queued_attached_files:
+                self.message_handler._notify(
+                    "error", "No files are currently queued for processing"
+                )
+                return CommandResult(handled=True, clear_flag=True)
+
+            self.message_handler._notify(
+                "system_message",
+                "📋 Queued files:\n"
+                + "\n".join(self.message_handler._queued_attached_files)
+                + "\nUsage: /drop <file_id>",
+            )
+            return CommandResult(handled=True, clear_flag=True)
+
+        try:
+            # Get the file command and parse its file paths
+            try:
+                self.message_handler._queued_attached_files.remove(file_path)
+            except Exception:
+                self.message_handler._notify(
+                    "error", f"Cannot unqueue file: {file_path}"
+                )
+
+            # Update or remove the command
+            self.message_handler._notify(
+                "system_message", f"🗑️ Removed file from queue: {file_path}"
+            )
+
+            # Notify about the file being removed for UI updates
+            self.message_handler._notify("file_dropped", {"file_path": file_path})
+
+            return CommandResult(handled=True, clear_flag=True)
+
+        except ValueError as e:
+            self.message_handler._notify("error", f"Invalid file ID format: {str(e)}")
+            return CommandResult(handled=True, clear_flag=True)
+        except Exception as e:
+            self.message_handler._notify("error", f"Error removing file: {str(e)}")
+            return CommandResult(handled=True, clear_flag=True)

@@ -79,7 +79,6 @@ class MessageHandler(Observable):
         self.streamline_messages.extend(std_msg)
 
     def _prepare_files_processing(self, file_command):
-        self._queued_attached_files.append(file_command)
         file_paths_str: str = file_command[6:].strip()
         file_paths: List[str] = [
             os.path.expanduser(path.strip())
@@ -88,6 +87,7 @@ class MessageHandler(Observable):
         ]
 
         for file_path in file_paths:
+            self._queued_attached_files.append(file_path)
             self._notify("file_processing", {"file_path": file_path})
 
     async def process_user_input(
@@ -146,7 +146,7 @@ class MessageHandler(Observable):
 
         while len(self._queued_attached_files) > 0:
             file_command = self._queued_attached_files.pop(0)
-            await self.command_processor.process_command(file_command)
+            await self.command_processor.process_command(f"/file {file_command}")
 
         # Add regular text message
         self._messages_append(

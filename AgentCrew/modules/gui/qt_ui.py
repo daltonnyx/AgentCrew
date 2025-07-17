@@ -510,6 +510,10 @@ class ChatWindow(QMainWindow, Observer):
             if not self.loading_conversation:
                 self.ui_state_manager.set_input_controls_enabled(True)
         elif event == "file_processed":
+            # Mark the file as processed in the chat components
+            file_path = data.get("file_path")
+            if file_path:
+                self.chat_components.mark_file_processed(file_path)
             self.current_file_bubble = None
         elif event == "image_generated":
             self.chat_components.append_file(data, False, True)

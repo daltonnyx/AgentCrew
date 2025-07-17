@@ -5,7 +5,7 @@ from AgentCrew.modules.llm.model_registry import ModelRegistry
 import os
 import re
 
-COMPLETER_PATTERN = re.compile(r"[A-z0-9-_.]+")
+COMPLETER_PATTERN = re.compile(r"[a-zA-Z0-9-_.]+")
 
 
 class JumpCompleter(Completer):
@@ -120,6 +120,7 @@ class ChatCompleter(Completer):
         self.agent_completer = AgentCompleter()
         self.jump_completer = JumpCompleter(message_handler)
         self.mcp_completer = MCPCompleter(message_handler)
+        self.drop_completer = DropCompleter(message_handler)
 
     def get_completions(self, document, complete_event):
         text = document.text
@@ -137,6 +138,8 @@ class ChatCompleter(Completer):
             yield from self.mcp_completer.get_completions(document, complete_event)
         elif text.startswith("/file "):
             yield from self.file_completer.get_completions(document, complete_event)
+        elif text.startswith("/drop "):
+            yield from self.drop_completer.get_completions(document, complete_event)
         elif text.startswith("/"):
             yield from self.get_command_completions(document)
 
@@ -169,6 +172,7 @@ class ChatCompleter(Completer):
                 "List MCP prompts or fetch specific prompt (usage: /mcp [server_id/prompt_name])",
             ),
             ("/file", "Process a file (usage: /file <path>)"),
+            ("/drop", "Remove a queued file from processing (usage: /drop <file_id>)"),
             ("/list", "List available conversations"),
             ("/load", "Load a conversation (usage: /load <conversation_id>)"),
             ("/help", "Show help message"),
@@ -219,6 +223,43 @@ class MCPCompleter(Completer):
                             )
 
 
+class DropCompleter(Completer):
+    """Completer that shows available queued files when typing /drop command."""
+
+    def __init__(self, message_handler=None):
+        self.message_handler = message_handler
+
+    def get_completions(self, document, complete_event):
+        text = document.text
+
+        # Only provide completions for the /drop command
+        if text.startswith("/drop "):
+            word_before_cursor = document.get_word_before_cursor(
+                pattern=COMPLETER_PATTERN
+            )
+
+            # Get all queued attached files
+            queued_files = (
+                self.message_handler._queued_attached_files
+                if self.message_handler
+                else []
+            )
+
+            # Extract file paths from queued files and create completions
+            for file_path in queued_files:
+                if file_path.startswith(word_before_cursor):
+                    yield Completion(
+                        file_path,
+                        start_position=-len(word_before_cursor),
+                        display=file_path,
+                    )
+                elif word_before_cursor.startswith("drop"):
+                    yield Completion(
+                        file_path,
+                        display=file_path,
+                    )
+
+
 class DirectoryListingCompleter(Completer):
     def __init__(self):
         # Use PathCompleter for the heavy lifting
@@ -230,7 +271,7 @@ class DirectoryListingCompleter(Completer):
             return
         # Look for patterns that might indicate a path
         # This regex searches for a potential directory path
-        path_match = re.search(r"((~|\.{1,2})?/[^\s]*|~)$", text)
+        path_match = re.search(r"((~|\.{1,2})?/[^\s/]*|~)$", text)
 
         if path_match:
             path = path_match.group(0)
