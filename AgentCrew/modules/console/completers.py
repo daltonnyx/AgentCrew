@@ -294,6 +294,10 @@ class DirectoryListingCompleter(Completer):
         if path.startswith("~"):
             path = os.path.expanduser(path)
 
+        # Ignore network paths
+        if path.startswith("//"):
+            return
+
         # Get the directory part
         directory = os.path.dirname(path) if "/" in path else path
 
