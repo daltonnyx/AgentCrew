@@ -142,9 +142,12 @@ class ConversationComponents:
         self.chat_window.loading_conversation = False
         QApplication.processEvents()
         self.chat_window.ui_state_manager.set_input_controls_enabled(True)
+        self.chat_window.chat_scroll.repaint()
+        QApplication.processEvents()
         self.chat_window.chat_scroll.verticalScrollBar().setValue(
             self.chat_window.chat_scroll.verticalScrollBar().maximum()
         )
+        QApplication.processEvents()
 
     @Slot(str)
     def handle_load_error(self, error_message):

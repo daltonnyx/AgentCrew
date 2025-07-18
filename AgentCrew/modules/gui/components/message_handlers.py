@@ -1,5 +1,7 @@
 from typing import Any
 
+from PySide6.QtWidgets import QApplication
+
 
 class MessageEventHandler:
     """Handles message-related events in the chat UI."""
@@ -73,6 +75,8 @@ class MessageEventHandler:
             self.chat_window.current_response_bubble.message_index = (
                 len(self.chat_window.message_handler.streamline_messages) - 1
             )
+        QApplication.processEvents()
+        self.chat_window.chat_scroll.repaint()
 
     def handle_thinking_started(self, data):
         """Handle thinking process started."""
