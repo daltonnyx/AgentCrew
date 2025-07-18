@@ -3,6 +3,7 @@ from typing import Dict, Any, List, Optional, Callable
 from mcp import ClientSession, StdioServerParameters
 from mcp.types import Prompt, ContentBlock, TextContent, ImageContent
 from mcp.client.stdio import stdio_client
+from mcp.client.streamable_http import streamablehttp_client
 from AgentCrew.modules.agents import AgentManager
 from AgentCrew.modules.tools.registry import ToolRegistry
 from .config import MCPServerConfig
@@ -37,7 +38,6 @@ class MCPService:
         try:
             if server_config.streaming_server:
                 # Import here to avoid import errors if not available
-                from mcp.client.streamable_http import streamablehttp_client
 
                 logger.info(f"MCPService: Using streaming HTTP client for {server_id}")
 
@@ -58,7 +58,7 @@ class MCPService:
                         logger.info(
                             f"MCPService: ClientSession established for {server_id}"
                         )
-                        await session.initialize()
+                        server_info = await session.initialize()
                         self.sessions[server_id] = session
                         self.connected_servers[server_id] = True
                         logger.info(
@@ -68,12 +68,9 @@ class MCPService:
                         for agent_name in server_config.enabledForAgents:
                             await self.register_server_tools(server_id, agent_name)
 
-                        try:
+                        if server_info.capabilities.prompts:
                             prompts = await self.sessions[server_id].list_prompts()
                             self.server_prompts[server_id] = prompts.prompts
-
-                        except Exception as e:
-                            logger.warning(f"{str(e)}")
 
                         logger.info(
                             f"MCPService: {server_id} setup complete. Waiting for shutdown signal."
@@ -96,7 +93,7 @@ class MCPService:
                         logger.info(
                             f"MCPService: ClientSession established for {server_id}"
                         )
-                        await session.initialize()
+                        server_info = await session.initialize()
                         self.sessions[server_id] = session
                         self.connected_servers[server_id] = (
                             True  # Mark as connected before tool registration
@@ -108,12 +105,9 @@ class MCPService:
                         for agent_name in server_config.enabledForAgents:
                             await self.register_server_tools(server_id, agent_name)
 
-                        try:
+                        if server_info.capabilities.prompts:
                             prompts = await self.sessions[server_id].list_prompts()
                             self.server_prompts[server_id] = prompts.prompts
-
-                        except Exception as e:
-                            logger.warning(f"{str(e)}")
 
                         logger.info(
                             f"MCPService: {server_id} setup complete. Waiting for shutdown signal."
