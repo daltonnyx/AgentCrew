@@ -366,10 +366,16 @@ class MessageBubble(QFrame):
         doc.setHtml(html_content)
         if sys.platform == "win32":
             from AgentCrew.modules.gui.utils.wins_clipboard import (
-                copy_html_to_clipboard,
+                copy_html_to_clipboard as win_copy_html,
             )
 
-            copy_html_to_clipboard(doc.toHtml(), self.raw_text)
+            win_copy_html(doc.toHtml(), self.raw_text)
+        elif sys.platform == "darwin":
+            from AgentCrew.modules.gui.utils.macos_clipboard import (
+                copy_html_to_clipboard as macos_copy_html,
+            )
+
+            macos_copy_html(doc.toHtml())
         else:
             pyperclip.copy(doc.toHtml())
 
@@ -423,10 +429,16 @@ class MessageBubble(QFrame):
 
                 if sys.platform == "win32":
                     from AgentCrew.modules.gui.utils.wins_clipboard import (
-                        copy_html_to_clipboard,
+                        copy_html_to_clipboard as win_copy_html,
                     )
 
-                    copy_html_to_clipboard(selected_html, selected_plain_text)
+                    win_copy_html(selected_html, selected_plain_text)
+                elif sys.platform == "darwin":
+                    from AgentCrew.modules.gui.utils.macos_clipboard import (
+                        copy_html_to_clipboard as macos_copy_html,
+                    )
+
+                    macos_copy_html(selected_html)
                 else:
                     pyperclip.copy(selected_html)
         except Exception:

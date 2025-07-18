@@ -1,6 +1,6 @@
 [project]
 name = "agentcrew-ai"
-version = "0.6.5-3"
+version = "0.6.5-4"
 requires-python = ">=3.12"
 classifiers = [
     "Programming Language :: Python :: 3",
@@ -43,6 +43,7 @@ dependencies = [
   "voyageai>=0.3.2",
   "numpy>=1.24.4,<2; python_version < '3.13' and sys_platform == 'darwin'",
   "pywin32; sys_platform == 'win32'",
+  "pyobjc; sys_platform == 'darwin'",
   "rapidocr-onnxruntime>=1.4.4",
   "a2a-sdk>=0.2.9",
   "qtawesome>=1.4.0",
