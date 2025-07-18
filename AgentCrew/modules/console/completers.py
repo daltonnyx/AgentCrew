@@ -271,7 +271,7 @@ class DirectoryListingCompleter(Completer):
             return
         # Look for patterns that might indicate a path
         # This regex searches for a potential directory path
-        path_match = re.search(r"((~|\.{1,2})?/[^\s/]*|~)$", text)
+        path_match = re.search(r"((~|\.{1,2})?(\/[^\s]*))$", text)
 
         if path_match:
             path = path_match.group(0)
