@@ -34,6 +34,7 @@ def copy_html_to_clipboard(html_content, text_fallback=None):
             html_format, html_clipboard_data.encode("utf-8")
         )
 
+    except Exception:
         # Set plain text format (for fallback)
         win32clipboard.SetClipboardData(win32con.CF_TEXT, text_fallback.encode("utf-8"))
 

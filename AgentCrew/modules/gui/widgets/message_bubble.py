@@ -361,14 +361,17 @@ class MessageBubble(QFrame):
         menu.exec_(self.message_label.mapToGlobal(position))
 
     def _copy_as_html(self):
+        html_content = self.message_label.text()
+        doc = QTextDocument()
+        doc.setHtml(html_content)
         if sys.platform == "win32":
             from AgentCrew.modules.gui.utils.wins_clipboard import (
                 copy_html_to_clipboard,
             )
 
-            copy_html_to_clipboard(self.message_label.text(), self.raw_text)
+            copy_html_to_clipboard(doc.toHtml(), self.raw_text)
         else:
-            pyperclip.copy(self.message_label.text())
+            pyperclip.copy(doc.toHtml())
 
     def _select_all_text(self):
         """Select all text in the message label."""
