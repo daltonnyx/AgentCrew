@@ -42,6 +42,7 @@ dependencies = [
   "nest-asyncio>=1.6.0",
   "voyageai>=0.3.2",
   "numpy>=1.24.4,<2; python_version < '3.13' and sys_platform == 'darwin'",
+  "pywin32; sys_platform == 'win32'",
   "rapidocr-onnxruntime>=1.4.4",
   "a2a-sdk>=0.2.9",
   "qtawesome>=1.4.0",

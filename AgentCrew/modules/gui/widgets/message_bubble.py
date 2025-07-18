@@ -1,6 +1,7 @@
 from typing import Optional
 import markdown
 import os
+import sys
 import mimetypes
 
 from PySide6.QtWidgets import (
@@ -353,13 +354,21 @@ class MessageBubble(QFrame):
         copy_markdown_action.triggered.connect(self.copy_as_markdown)
 
         copy_all_html_action = menu.addAction("Copy all as Html")
-        copy_all_html_action.triggered.connect(
-            lambda: pyperclip.copy(self.message_label.text())
-        )
+        copy_all_html_action.triggered.connect(self._copy_as_html)
 
         menu.setStyleSheet(self.style_provider.get_context_menu_style())
 
         menu.exec_(self.message_label.mapToGlobal(position))
+
+    def _copy_as_html(self):
+        if sys.platform == "win32":
+            from AgentCrew.modules.gui.utils.wins_clipboard import (
+                copy_html_to_clipboard,
+            )
+
+            copy_html_to_clipboard(self.message_label.text(), self.raw_text)
+        else:
+            pyperclip.copy(self.message_label.text())
 
     def _select_all_text(self):
         """Select all text in the message label."""
@@ -409,7 +418,14 @@ class MessageBubble(QFrame):
                 fragment = cursor.selection()
                 selected_html = fragment.toHtml()
 
-                pyperclip.copy(selected_html)
+                if sys.platform == "win32":
+                    from AgentCrew.modules.gui.utils.wins_clipboard import (
+                        copy_html_to_clipboard,
+                    )
+
+                    copy_html_to_clipboard(selected_html, selected_plain_text)
+                else:
+                    pyperclip.copy(selected_html)
         except Exception:
             try:
                 selected_text = self.message_label.selectedText()
