@@ -11,6 +11,7 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache2.0-yellow.svg)](https://github.com/saigontechnology/AgentCrew/blob/main/LICENSE)
 [![Status: Beta](https://img.shields.io/badge/Status-Beta-blue)](https://github.com/saigontechnology/AgentCrew/releases)
 [![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/release/python-3120/)
+[![Docker](https://img.shields.io/badge/docker-supported-blue.svg)](https://hub.docker.com/r/daltonnyx/agentcrew)
 
 ## Introduction
 
@@ -174,12 +175,110 @@ powershell -ExecutionPolicy ByPass -c "irm https://agentcrew.dev/install.ps1 | i
    uv tool install .
    ```
 
+**Docker Installation:**
+
+If you prefer containerized deployment or want to avoid local Python setup:
+
+1. **Using Pre-built Image (Recommended):**
+
+   ```bash
+   # Pull and run the latest image
+   docker pull daltonnyx/agentcrew:latest
+
+   # Run with console interface
+   docker run -it --rm \
+     -e ANTHROPIC_API_KEY="your_claude_api_key" \
+     -e OPENAI_API_KEY="your_openai_api_key" \
+     daltonnyx/agentcrew chat
+   ```
+
+2. **Building from Source:**
+
+   ```bash
+   # Clone the repository
+   git clone https://github.com/saigontechnology/AgentCrew.git
+   cd AgentCrew
+
+   # Build Docker image (must be run from project root)
+   docker build -f docker/Dockerfile -t agentcrew-ai .
+
+   # Or use the provided build script
+   ./docker/build.sh
+   ```
+
+3. **Docker Features:**
+   - **Console Mode Only:** GUI is disabled in Docker for better compatibility
+     and smaller image size
+   - **Persistent Data:** Use Docker volumes to persist conversations and
+     settings
+   - **A2A Server Mode:** Run as a server exposing agents via HTTP API
+   - **Multiple AI Providers:** Same provider support as the regular
+     installation
+
+## 🐳 Docker Usage
+
+**Quick Start with Docker:**
+
+```bash
+# Interactive console mode
+docker run -it --rm \
+  -e ANTHROPIC_API_KEY="your_api_key" \
+  daltonnyx/agentcrew chat
+
+# With persistent data
+docker volume create agentcrew_data
+docker run -it --rm \
+  -v agentcrew_data:/home/agentcrew/.AgentCrew \
+  -e ANTHROPIC_API_KEY="your_api_key" \
+  daltonnyx/agentcrew chat
+
+# A2A Server mode (HTTP API)
+docker run -d \
+  --name agentcrew-server \
+  -p 41241:41241 \
+  -e ANTHROPIC_API_KEY="your_api_key" \
+  daltonnyx/agentcrew a2a-server --host 0.0.0.0 --port 41241
+```
+
+**Custom Configuration with Docker:**
+
+```bash
+# Create custom agents configuration
+cat > custom_agents.toml << EOF
+[[agents]]
+name = "researcher"
+description = "AI Research Assistant"
+system_prompt = """You are a research assistant specialized in finding and analyzing information.
+Current date: {current_date}
+"""
+tools = ["memory", "web_search", "code_analysis"]
+
+[[agents]]
+name = "coder"
+description = "AI Coding Assistant"
+system_prompt = """You are a coding assistant specialized in software development.
+Current date: {current_date}
+"""
+tools = ["memory", "clipboard", "code_analysis"]
+EOF
+
+# Run with custom configuration
+docker run -it --rm \
+  -v $(pwd)/custom_agents.toml:/home/agentcrew/.AgentCrew/agents.toml:ro \
+  -e ANTHROPIC_API_KEY="your_api_key" \
+  daltonnyx/agentcrew chat --agent-config /home/agentcrew/.AgentCrew/agents.toml
+```
+
+For complete Docker documentation, see [`docker/DOCKER.md`](docker/DOCKER.md).
+
 ## ▶️ Getting Started / Basic Usage
 
 Chat with AgentCrew using its interface. The graphical interface (GUI) is
-usually the easiest way to start.
+usually the easiest way to start for local installations. **Docker users will
+automatically use the console interface** as GUI is disabled in containers for
+better compatibility.
 
-**Using the command line:**
+**Using the command line (Local Installation):**
 
 To start AgentCrew, open your terminal and use the `agentcrew chat` command.
 Here are some common ways to use it (assuming you have installed AgentCrew using
@@ -238,11 +337,48 @@ _Remember to replace `/path/to/your/agents.toml` and
 `/path/to/your/mcp_servers.json` with the actual paths to your configuration
 files if you use those options._
 
-**To set up GitHub Copilot authentication:** Before using GitHub Copilot as a
-provider, run:
+**Using Docker Commands:**
+
+For Docker users, replace `agentcrew` with the full Docker command:
+
+```bash
+# Basic Docker usage (equivalent to agentcrew chat)
+docker run -it --rm \
+  -e ANTHROPIC_API_KEY="your_key" \
+  daltonnyx/agentcrew chat
+
+# With specific provider (equivalent to agentcrew chat --provider openai)
+docker run -it --rm \
+  -e OPENAI_API_KEY="your_key" \
+  daltonnyx/agentcrew chat --provider openai
+
+# With custom config (mount config files)
+docker run -it --rm \
+  -v $(pwd)/custom_agents.toml:/home/agentcrew/.AgentCrew/agents.toml:ro \
+  -e ANTHROPIC_API_KEY="your_key" \
+  daltonnyx/agentcrew chat --agent-config /home/agentcrew/.AgentCrew/agents.toml
+
+# A2A Server mode
+docker run -d -p 41241:41241 \
+  -e ANTHROPIC_API_KEY="your_key" \
+  daltonnyx/agentcrew a2a-server --host 0.0.0.0 --port 41241
+```
+
+**To set up GitHub Copilot authentication:**
+
+_Local installation:_
 
 ```bash
 agentcrew copilot-auth
+```
+
+_Docker:_
+
+```bash
+# Interactive authentication with persistent storage
+docker run -it --rm \
+  -v agentcrew_data:/home/agentcrew/.AgentCrew \
+  daltonnyx/agentcrew copilot-auth
 ```
 
 **In-Chat Commands (for console and GUI):**

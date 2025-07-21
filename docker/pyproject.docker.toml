@@ -1,0 +1,78 @@
+[project]
+name = "agentcrew-ai"
+version = "0.6.5-4"
+requires-python = ">=3.12"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+description = "Multi-Agents Interactive Chat Tool"
+authors = [
+    {name = "Quy Truong", email = "quy.truong@saigontechnology.com"},
+]
+readme = "README.md"
+
+dependencies = [
+  "click",
+  "python-dotenv",
+  "anthropic",
+  "pytest",
+  "prompt-toolkit>=3.0.50",
+  "rich>=13.9.4",
+  "pyperclip>=1.9.0",
+  "tavily-python>=0.5.1",
+  "pillow>=11.1.0",
+  "groq>=0.18.0",
+  "chromadb>=1.0.0",
+  "openai>=1.65.2",
+  "tree-sitter>=0.23.2",
+  "mcp>=1.3.0",
+  "docling>=2.26.0",
+  "google-genai>=1.7.0",
+  "toml>=0.10.2",
+  "markdown>=3.7",
+  "tree-sitter-language-pack>=0.7.0",
+  "nest-asyncio>=1.6.0",
+  "voyageai>=0.3.2",
+  "numpy>=1.24.4,<2; python_version < '3.13' and sys_platform == 'darwin'",
+  "pywin32; sys_platform == 'win32'",
+  "pyobjc; sys_platform == 'darwin'",
+  "rapidocr-onnxruntime>=1.4.4",
+  "a2a-sdk>=0.2.9",
+  # PySide6 and qtawesome excluded for Docker builds
+]
+
+[project.optional-dependencies]
+
+mem0ai = []
+
+[project.urls]
+"Homepage" = "https://github.com/daltonnyx/AgentCrew"
+"Bug Tracker" = "https://github.com/daltonnyx/AgentCrew/issues"
+
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+agentcrew = "AgentCrew.main_docker:cli_prod"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["./"]
+
+[dependency-groups]
+dev = [
+    "pygments>=2.19.1",
+    "pyinstaller>=6.13.0",
+    "langfuse>=3.0.1",
+]

@@ -1,0 +1,89 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+.env
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Logs and runtime data
+*.log
+memory_db/
+mcp_servers.json
+.chat_histories
+persistents/
+config.json
+generate
+
+# Documentation and examples (not needed for runtime)
+ai_docs/
+specs/
+examples/
+tests/
+
+# GitHub workflows
+.github/
+
+# Other files not needed in container
+refactor_summary.md
+release_diff.txt
+verify_package.py
+pyrightconfig.json
+agent.html.toml
+agents.toml
+mcp_servers.json.example
