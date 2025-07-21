@@ -741,6 +741,10 @@ def a2a_server(
         click.echo(f"Starting A2A server on {host}:{port}")
         click.echo(f"Available agents: {', '.join(agent_manager.agents.keys())}")
         server.start()
+    except SystemExit:
+        from AgentCrew.modules.mcpclient import MCPSessionManager
+
+        MCPSessionManager.get_instance().cleanup()
     except Exception as e:
         print(traceback.format_exc())
         click.echo(f"❌ Error: {str(e)}", err=True)
