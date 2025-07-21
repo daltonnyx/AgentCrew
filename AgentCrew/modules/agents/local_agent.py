@@ -18,6 +18,7 @@ class LocalAgent(BaseAgent):
         services: Dict[str, Any],
         tools: List[str],
         temperature: Optional[float] = None,
+        is_remoting_mode: bool = False,
     ):
         """
         Initialize a new agent.
@@ -38,6 +39,7 @@ class LocalAgent(BaseAgent):
         self.system_prompt = None
         self.custom_system_prompt = None
         self.tool_prompts = []
+        self.is_remoting_mode = is_remoting_mode
         # self.history = []
         # self.shared_context_pool: Dict[str, List[int]] = {}
         # Store tool definitions in the same format as ToolRegistry
@@ -71,7 +73,7 @@ class LocalAgent(BaseAgent):
         Register tools for this agent using the services dictionary.
         """
 
-        if self.services.get("agent_manager"):
+        if self.services.get("agent_manager") and not self.is_remoting_mode:
             from AgentCrew.modules.agents.tools.transfer import (
                 register as register_transfer,
             )
@@ -208,17 +210,16 @@ class LocalAgent(BaseAgent):
         if not self.llm:
             return False
 
+        if self.is_active:
+            return True  # Already active
+
         self.register_tools()
         self._register_tools_with_llm()
         system_prompt = self.get_system_prompt()
         if self.custom_system_prompt:
-            system_prompt = (
-                self.get_system_prompt()
-                + "\n---\n\n"
-                + self.custom_system_prompt
-                + "\n---\n\n"
-                + "\n".join(self.tool_prompts)
-            )
+            system_prompt = system_prompt + "\n---\n\n" + self.custom_system_prompt
+        if self.tool_prompts:
+            system_prompt = system_prompt + "\n---\n\n" + "\n".join(self.tool_prompts)
 
         self.llm.set_system_prompt(system_prompt)
         self.llm.temperature = self.temperature if self.temperature is not None else 0.4
@@ -398,6 +399,7 @@ class LocalAgent(BaseAgent):
             final_messages = list(self.history)
         else:
             final_messages = list(messages)
+            print(messages)
         if "context_persistent" in self.services and isinstance(
             self.services["context_persistent"], ContextPersistenceService
         ):

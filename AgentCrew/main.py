@@ -222,12 +222,16 @@ def run_update_command():
 
         if system == "linux" or system == "darwin":  # Darwin is macOS
             # Linux/macOS update command
-            command = "uv tool install --reinstall --python=3.12 agentcrew-ai@latest"
+            command = (
+                "uv tool install --reinstall --force --python=3.12 agentcrew-ai@latest"
+            )
             click.echo("🐧 Running Linux/macOS update command...")
 
         elif system == "windows":
             # Windows update command
-            command = "uv tool install --reinstall --python=3.12 agentcrew-ai@latest"
+            command = (
+                "uv tool install --reinstall --force --python=3.12 agentcrew-ai@latest"
+            )
             click.echo("🪟 Running Windows update command...")
 
         else:
@@ -358,7 +362,7 @@ def setup_services(provider, memory_llm=None):
     return services
 
 
-def setup_agents(services, config_path, standalone_provider=None):
+def setup_agents(services, config_path, remoting_provider=None, model_id=None):
     """
     Set up the agent system with specialized agents.
 
@@ -421,10 +425,12 @@ tools = ["memory", "clipboard", "web_search", "code_analysis"]
         else:
             if not first_agent_name:
                 first_agent_name = agent_def["name"]
-            if standalone_provider:
+            if remoting_provider:
                 llm_service = llm_manager.initialize_standalone_service(
-                    standalone_provider
+                    remoting_provider
                 )
+                if model_id:
+                    llm_service.model = model_id
             agent = LocalAgent(
                 name=agent_def["name"],
                 description=agent_def["description"],
@@ -434,13 +440,15 @@ tools = ["memory", "clipboard", "web_search", "code_analysis"]
                 temperature=agent_def.get("temperature", None),
             )
             agent.set_system_prompt(agent_def["system_prompt"])
+            if remoting_provider:
+                agent.set_custom_system_prompt("You are running as remoting mode")
+                agent.is_remoting_mode = True
         agent_manager.register_agent(agent)
 
     from AgentCrew.modules.mcpclient.tool import register as mcp_register
 
     mcp_register()
 
-    # NEW: Try to restore last used agent first, then fall back to first_agent_name
     initial_agent_selected = False
     try:
         config_manager = ConfigManagement()
@@ -653,6 +661,7 @@ def chat(provider, agent_config, mcp_config, memory_llm, console):
     default=None,
     help="LLM provider to use (claude, groq, openai, google, github_copilot or deepinfra)",
 )
+@click.option("--model-id", default=None, help="Model ID from provider")
 @click.option("--agent-config", default=None, help="Path to agent configuration file")
 @click.option("--api-key", default=None, help="API key for authentication (optional)")
 @click.option(
@@ -665,7 +674,15 @@ def chat(provider, agent_config, mcp_config, memory_llm, console):
     help="LLM Model use for analyzing and processing memory",
 )
 def a2a_server(
-    host, port, base_url, provider, agent_config, api_key, mcp_config, memory_llm
+    host,
+    port,
+    base_url,
+    provider,
+    model_id,
+    agent_config,
+    api_key,
+    mcp_config,
+    memory_llm,
 ):
     """Start an A2A server exposing all SwissKnife agents"""
     try:
@@ -698,7 +715,7 @@ def a2a_server(
             os.environ["MCP_CONFIG_PATH"] = mcp_config
 
         # Set up agents from configuration
-        setup_agents(services, agent_config, provider)
+        setup_agents(services, agent_config, provider, model_id)
 
         # Get agent manager
         agent_manager = AgentManager.get_instance()
