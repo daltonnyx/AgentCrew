@@ -290,6 +290,21 @@ class AgentTaskManager(TaskManager):
 
                     # Process each tool use
                     for tool_use in tool_uses:
+                        if task.id in self.streaming_tasks:
+                            queue = self.streaming_tasks[task.id]
+
+                            artifact = convert_agent_response_to_a2a_artifact(
+                                f"\n```tool_call\ntool_name: {tool_use['name']}\nInput: {tool_use['input']}\n```",
+                                artifact_id=f"artifact_{task.id}_{len(artifacts)}",
+                            )
+                            await queue.put(
+                                TaskArtifactUpdateEvent(
+                                    taskId=task.id,
+                                    contextId=task.contextId,
+                                    artifact=artifact,
+                                )
+                            )
+
                         try:
                             tool_result = await agent.execute_tool_call(
                                 tool_use["name"],
@@ -314,6 +329,21 @@ class AgentTaskManager(TaskManager):
                             )
                             if error_message:
                                 self.task_history[task.id].append(error_message)
+
+                    if task.id in self.streaming_tasks:
+                        queue = self.streaming_tasks[task.id]
+
+                        artifact = convert_agent_response_to_a2a_artifact(
+                            "\n",
+                            artifact_id=f"artifact_{task.id}_{len(artifacts)}",
+                        )
+                        await queue.put(
+                            TaskArtifactUpdateEvent(
+                                taskId=task.id,
+                                contextId=task.contextId,
+                                artifact=artifact,
+                            )
+                        )
                     await _process_task()
                 return current_response
 
