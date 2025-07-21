@@ -50,7 +50,7 @@ class MCPSessionManager:
             self.mcp_service.stop()
             self.initialized = False  # Ensure it's marked as not initialized
 
-    def initialize_for_agent(self, agent_name) -> None:
+    def initialize_for_agent(self, agent_name: Optional[str] = None) -> None:
         if not self.initialized:
             logger.error("MCPSessionManager: Has not initialized.")
             return

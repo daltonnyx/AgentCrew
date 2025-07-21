@@ -441,13 +441,20 @@ tools = ["memory", "clipboard", "web_search", "code_analysis"]
             )
             agent.set_system_prompt(agent_def["system_prompt"])
             if remoting_provider:
-                agent.set_custom_system_prompt("You are running as remoting mode")
+                agent.set_custom_system_prompt(agent_manager.get_remote_system_prompt())
                 agent.is_remoting_mode = True
         agent_manager.register_agent(agent)
 
     from AgentCrew.modules.mcpclient.tool import register as mcp_register
 
     mcp_register()
+
+    if remoting_provider:
+        from AgentCrew.modules.mcpclient import MCPSessionManager
+
+        mcp_manager = MCPSessionManager.get_instance()
+        mcp_manager.initialize_for_agent()
+        return
 
     initial_agent_selected = False
     try:
