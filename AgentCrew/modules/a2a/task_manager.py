@@ -8,6 +8,8 @@ from typing import Dict, AsyncIterable, Optional, Any, Union
 from AgentCrew.modules.agents import AgentManager, LocalAgent
 from AgentCrew.modules.agents.base import MessageType
 from AgentCrew.modules import logger
+import tempfile
+import os
 
 from a2a.types import (
     CancelTaskResponse,
@@ -55,6 +57,7 @@ class AgentTaskManager(TaskManager):
         self.tasks: Dict[str, Task] = {}
         self.task_history: Dict[str, list[Dict[str, Any]]] = {}
         self.streaming_tasks: Dict[str, asyncio.Queue] = {}
+        self.file_handler = None
 
     async def on_send_message(
         self, request: SendMessageRequest | SendStreamingMessageRequest
@@ -103,6 +106,26 @@ class AgentTaskManager(TaskManager):
 
         # Convert A2A message to SwissKnife format
         message = convert_a2a_message_to_agent(request.params.message)
+        if next(
+            (m for m in message.get("content", []) if m.get("type", "text") == "file"),
+            None,
+        ):
+            from AgentCrew.modules.chat.file_handler import FileHandler
+
+            new_parts = []
+            if self.file_handler is None:
+                self.file_handler = FileHandler()
+            for part in message.get("content", []):
+                if part.get("type") == "file":
+                    temp_file = os.path.join(tempfile.gettempdir(), part["file_name"])
+                    with open(temp_file, "wb") as f:
+                        f.write(part["file_data"])
+                    new_parts.append(self.file_handler.process_file(temp_file))
+                else:
+                    new_parts.append(part)
+
+            message["content"] = new_parts
+
         self.task_history[task_id].append(message)
 
         # Process with agent (non-blocking)

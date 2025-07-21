@@ -48,7 +48,7 @@ def convert_a2a_message_to_agent(message: Message) -> Dict[str, Any]:
                 content.append(
                     {
                         "type": "file",
-                        "file_data": file_data.bytes,
+                        "file_data": base64.b64decode(file_data.bytes),
                         "file_name": file_data.name or "file",
                         "mime_type": file_data.mimeType or "application/octet-stream",
                     }
