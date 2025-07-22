@@ -54,8 +54,10 @@ class A2AServer:
         self.api_key = api_key or os.getenv("A2A_SERVER_API_KEY", "Bearer ")
         logger.debug(f"Using base URL: {self.base_url}")
 
+        self.exposed_url = os.getenv("A2A_SERVER_EXPOSED_URL", self.base_url)
+
         # Create agent registry
-        self.agent_registry = AgentRegistry(agent_manager, self.base_url)
+        self.agent_registry = AgentRegistry(agent_manager, self.exposed_url)
 
         # Create task manager
         self.task_manager = MultiAgentTaskManager(agent_manager)
