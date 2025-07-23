@@ -284,15 +284,18 @@ class AgentManager:
         # Set the new current agent
         self.select_agent(target_agent_name)
         if direct_injected_messages and self.current_agent:
+            length_of_current_agent_history = len(self.current_agent.history)
             self.current_agent.history.extend(
                 MessageTransformer.convert_messages(
                     direct_injected_messages, self.current_agent.get_provider()
                 )
             )
             ## injected messages should not be transfered back to source agent
-            if source_agent_name:
-                for i, _ in enumerate(self.current_agent.std_history):
-                    self.current_agent.shared_context_pool[source_agent_name].append(i)
+            if source_agent_name and self.current_agent:
+                for i in range(len(direct_injected_messages)):
+                    self.current_agent.shared_context_pool[source_agent_name].append(
+                        length_of_current_agent_history + i
+                    )
 
         return {"success": True, "transfer": transfer_record}
 

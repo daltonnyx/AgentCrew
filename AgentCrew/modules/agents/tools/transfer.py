@@ -89,7 +89,10 @@ def get_transfer_tool_handler(agent_manager: AgentManager) -> Callable:
         if not task:
             raise ValueError("Error: No task specified for the transfer")
 
-        if target_agent == agent_manager.current_agent.name:
+        if (
+            agent_manager.current_agent
+            and target_agent == agent_manager.current_agent.name
+        ):
             raise ValueError("Error: Cannot transfer to same agent")
 
         result = agent_manager.perform_transfer(target_agent, task)
