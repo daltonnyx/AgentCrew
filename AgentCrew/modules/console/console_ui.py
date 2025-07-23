@@ -20,6 +20,7 @@ from AgentCrew.modules.chat.message_handler import MessageHandler, Observer
 from AgentCrew.modules import logger
 
 from .constants import (
+    RICH_STYLE_GREEN,
     RICH_STYLE_YELLOW,
     RICH_STYLE_GREEN_BOLD,
     RICH_STYLE_YELLOW_BOLD,
@@ -280,6 +281,21 @@ class ConsoleUI(Observer):
         version = getattr(AgentCrew, "__version__", "Unknown")
         self.display_handlers.print_welcome_message(version)
 
+    def print_logo(self):
+        self.console.print(
+            Text(
+                """
+ █████╗   ██████╗  ███████╗ ███╗   ██╗ ████████╗  ██████╗ ██████╗  ███████╗ ██╗    ██╗
+ ██╔══██╗ ██╔════╝  ██╔════╝ ████╗  ██║ ╚══██╔══╝ ██╔════╝ ██╔══██╗ ██╔════╝ ██║    ██║
+ ███████║ ██║  ███╗ █████╗   ██╔██╗ ██║    ██║    ██║      ██████╔╝ █████╗   ██║ █╗ ██║
+ ██╔══██║ ██║   ██║ ██╔══╝   ██║╚██╗██║    ██║    ██║      ██╔══██╗ ██╔══╝   ██║███╗██║
+ ██║  ██║ ╚██████╔╝ ███████╗ ██║ ╚████║    ██║    ╚██████╗ ██║  ██║ ███████╗ ╚███╔███╔╝
+ ╚═╝  ╚═╝  ╚═════╝  ╚══════╝ ╚═╝  ╚═══╝    ╚═╝     ╚═════╝ ╚═╝  ╚═╝ ╚══════╝  ╚══╝╚══╝ 
+        """,
+                RICH_STYLE_GREEN,
+            )
+        )
+
     def display_token_usage(
         self,
         input_tokens: int,
@@ -302,6 +318,7 @@ class ConsoleUI(Observer):
 
     def start(self):
         """Start the console UI main loop."""
+        self.print_logo()
         self.print_welcome_message()
 
         self.session_cost = 0.0

@@ -8,11 +8,11 @@ class UnicornTheme:
 
     Unicorn Candy Palette:
     - Light Cyan: #d0f4f4 (Cool cyan - primary backgrounds)
-    - Lavender: #eed5ff (Light purple - secondary backgrounds) 
+    - Lavender: #eed5ff (Light purple - secondary backgrounds)
     - Pink: #ffc0d7 (Soft pink - accent elements)
     - Cream: #fff9c1 (Light yellow - highlights)
     - Mint: #cfebd2 (Light green - success states)
-    
+
     Extended palette for dark elements:
     - Deep Purple: #6b46c1 (Primary actions)
     - Dark Slate: #374151 (Text and borders)
