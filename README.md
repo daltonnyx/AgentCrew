@@ -116,6 +116,7 @@ Here are some things AgentCrew can do:
   window (GUI).
 - **File Handling:** AI agents can work with text and image files in chat.
   AgentCrew also supports PDF, DOCX, XLSX, and PPTX files.
+- **📋 Smart Paste Detection:** Automatically detects images and binary content when pasted (Ctrl+V). Images from screenshots, copied files, or other sources are automatically converted to `/file` commands for seamless processing.
 - **Streaming Responses:** Get real-time replies from AI agents.
 - **"Thinking Mode":** Some AI models can show their reasoning process.
 - **Rollback Messages:** Easily go back to an earlier point in your

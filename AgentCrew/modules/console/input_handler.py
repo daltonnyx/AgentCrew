@@ -18,6 +18,7 @@ from rich.text import Text
 
 from AgentCrew.modules import logger
 from AgentCrew.modules.chat import MessageHandler
+from AgentCrew.modules.clipboard.service import ClipboardService
 from .completers import ChatCompleter
 from .display_handlers import DisplayHandlers
 from .constants import (
@@ -41,6 +42,7 @@ class InputHandler:
         self.console = console
         self.message_handler = message_handler
         self.display_handlers = display_handlers
+        self.clipboard_service = ClipboardService()
 
         # Threading for user input
         self._input_queue = queue.Queue()
@@ -74,6 +76,40 @@ class InputHandler:
             """Copy latest assistant response to clipboard."""
             # This will be handled by the main console UI
             pass
+
+        @kb.add(Keys.ControlV)
+        def _(event):
+            """Handle Ctrl+V with image/binary detection."""
+            try:
+                # Check if clipboard contains image or binary content
+                paste_result = self.clipboard_service.read_and_process_paste()
+
+                if paste_result["success"]:
+                    content_type = paste_result.get("type")
+
+                    if content_type == "file_command":
+                        # Insert the file command
+                        file_command = paste_result["content"]
+
+                        # Insert the file command into the current buffer
+                        event.current_buffer.insert_text(file_command)
+                        event.current_buffer.validate_and_handle()
+
+                        return
+
+                # For regular text content, use default paste behavior
+                event.current_buffer.paste_clipboard_data(
+                    event.app.clipboard.get_data()
+                )
+
+            except Exception:
+                # Fall back to default paste behavior if anything goes wrong
+                try:
+                    event.current_buffer.paste_clipboard_data(
+                        event.app.clipboard.get_data()
+                    )
+                except Exception:
+                    pass  # Ignore if even default paste fails
 
         @kb.add(Keys.ControlC)
         def _(event):
@@ -257,7 +293,7 @@ class InputHandler:
                 style=RICH_STYLE_BLUE,
             )
             title.append(
-                "\n(Press Enter for new line, Ctrl+S/Alt+Enter to submit, Up/Down for history)\n",
+                "\n(Press Enter for new line, Ctrl+S/Alt+Enter to submit, Up/Down for history, Ctrl+V to paste)\n",
                 style=RICH_STYLE_YELLOW,
             )
             self.console.print(title)

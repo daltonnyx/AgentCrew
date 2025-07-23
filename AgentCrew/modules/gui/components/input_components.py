@@ -3,16 +3,16 @@ import os
 from PySide6.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
-    QTextEdit,
     QPushButton,
     QCompleter,
     QFileDialog,
     QSizePolicy,
 )
-from PySide6.QtCore import Qt, QStringListModel
+from PySide6.QtCore import Qt, QStringListModel, Slot
 from PySide6.QtGui import QTextCursor
 import qtawesome as qta
 from AgentCrew.modules.console.completers import DirectoryListingCompleter
+from AgentCrew.modules.gui.widgets.paste_aware_textedit import PasteAwareTextEdit
 from .completers import GuiChatCompleter
 
 
@@ -29,8 +29,9 @@ class InputComponents:
 
     def _setup_input_area(self):
         """Set up the input area with text input and buttons."""
-        # Input area
-        self.chat_window.message_input = QTextEdit()
+        # Input area - use our custom paste-aware text edit
+        self.chat_window.message_input = PasteAwareTextEdit()
+
         input_font = self.chat_window.message_input.font()
         input_font.setPixelSize(16)
         self.chat_window.message_input.setFont(input_font)
@@ -46,6 +47,7 @@ class InputComponents:
         self.chat_window.message_input.setSizePolicy(
             QSizePolicy.Policy.Minimum, QSizePolicy.Policy.MinimumExpanding
         )
+        self.chat_window.message_input.image_inserted.connect(self.image_inserted)
 
         # Create buttons layout
         buttons_layout = QVBoxLayout()
@@ -74,6 +76,10 @@ class InputComponents:
 
         # Store the buttons layout for use in main window
         self.buttons_layout = buttons_layout
+
+    @Slot(str)
+    def image_inserted(self, file_command):
+        self.chat_window.llm_worker.process_request.emit(file_command)
 
     def _setup_file_completion(self):
         """Set up file path completion for the input field."""
