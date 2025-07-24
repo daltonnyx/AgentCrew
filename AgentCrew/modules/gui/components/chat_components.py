@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import (
+    QSizePolicy,
     QWidget,
     QVBoxLayout,
     QHBoxLayout,
@@ -47,6 +48,10 @@ class ChatComponents:
         self.chat_window.chat_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         self.chat_window.chat_layout.setSpacing(15)
         self.chat_window.chat_layout.setContentsMargins(2, 2, 5, 5)
+        self.chat_window.chat_container.setMinimumHeight(100)
+        self.chat_window.chat_container.setSizePolicy(
+            QSizePolicy.Policy.Minimum, QSizePolicy.Policy.MinimumExpanding
+        )
 
     def _setup_status_components(self):
         """Set up status and token usage components."""

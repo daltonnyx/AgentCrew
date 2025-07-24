@@ -140,9 +140,10 @@ class ConversationComponents:
             f"Loaded conversation: {conversation_id}"
         )
         self.chat_window.loading_conversation = False
-        QApplication.processEvents()
         self.chat_window.ui_state_manager.set_input_controls_enabled(True)
-        self.chat_window.chat_scroll.repaint()
+        QApplication.processEvents()
+        self.chat_window.chat_container.adjustSize()
+        self.chat_window.chat_scroll.updateGeometry()
         QApplication.processEvents()
         self.chat_window.chat_scroll.verticalScrollBar().setValue(
             self.chat_window.chat_scroll.verticalScrollBar().maximum()

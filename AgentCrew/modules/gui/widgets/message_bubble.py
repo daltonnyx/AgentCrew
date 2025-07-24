@@ -8,10 +8,10 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QLabel,
     QFrame,
+    QSizePolicy,
     QPushButton,
     QHBoxLayout,
     QFileIconProvider,
-    QScrollArea,
     QMenu,
 )
 from PySide6.QtCore import Qt, QFileInfo, QByteArray, QTimer
@@ -131,25 +131,18 @@ class MessageBubble(QFrame):
                 self.style_provider.get_assistant_message_label_style()
             )
 
-        # Set the text content (convert Markdown to HTML)
-        if text:
-            self.raw_text = text
-            self.set_text(text)
-
         # Setup context menu
         self.message_label.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
         self.message_label.customContextMenuRequested.connect(self.show_context_menu)
-
-        # self.message_label.setSizePolicy(
-        #     QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum
-        # )
 
         if text is not None:
             # Add to layout
             layout.addWidget(self.message_label)
 
         # Set size policies
-        # self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
+        self.setSizePolicy(
+            QSizePolicy.Policy.MinimumExpanding, QSizePolicy.Policy.Minimum
+        )
 
         # For user messages, add hover button functionality
         if is_user and message_index is not None:
@@ -330,6 +323,11 @@ class MessageBubble(QFrame):
                 original_resize_event(event)
 
         self.resizeEvent = resize_event_wrapper
+
+        # Set the text content (convert Markdown to HTML)
+        if text:
+            self.raw_text = text
+            self.set_text(text)
 
     def show_context_menu(self, position):
         """Create and show context menu with standard text actions plus Copy as Markdown."""
@@ -534,9 +532,6 @@ class MessageBubble(QFrame):
             current_text = self.message_label.text()
             self.message_label.setText(current_text + new_chars)
 
-            # Auto-scroll to keep latest content visible
-            # self._ensure_visible()
-
     def _finalize_streaming(self):
         """Convert to formatted text once streaming is complete."""
         self.is_streaming = False
@@ -554,22 +549,6 @@ class MessageBubble(QFrame):
         """Force stop streaming and finalize immediately."""
         if self.is_streaming:
             self._finalize_streaming()
-
-    def _ensure_visible(self):
-        """Ensure the latest content is visible by scrolling."""
-        try:
-            # Get the parent scroll area and scroll to bottom
-            parent = self.parent()
-            while parent and not isinstance(parent, QScrollArea):
-                parent = parent.parent()
-
-            if parent and hasattr(parent, "verticalScrollBar"):
-                scrollbar = parent.verticalScrollBar()
-                if scrollbar:
-                    scrollbar.setValue(scrollbar.maximum())
-        except Exception:
-            # Silently handle any scrolling errors to avoid disrupting streaming
-            pass
 
     def append_text(self, text):
         """Update method to handle both streaming and normal modes."""
