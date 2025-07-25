@@ -314,6 +314,13 @@ class AgentManager:
                 # Update the LLM service for the current agent
                 self.current_agent.update_llm_service(llm_service)
 
+                from AgentCrew.modules.mcpclient.manager import MCPSessionManager
+
+                # Reinitialize MCP session manager for the current agent
+                mcp_manager = MCPSessionManager.get_instance()
+                if mcp_manager.initialized:
+                    mcp_manager.initialize_for_agent(self.current_agent.name)
+
             # Reactivate the agent with the new LLM service
             self.current_agent.activate()
 
