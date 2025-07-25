@@ -56,6 +56,8 @@ class UIEffects:
             while not stop_event.is_set():
                 live.update(f"{fun_word} {next(spinner)}")
                 time.sleep(0.1)  # Control animation speed
+            live.update("")  # Clear the live display when done
+            live.stop()  # Stop the live display
 
     def start_loading_animation(self):
         """Start the loading animation."""
@@ -72,9 +74,6 @@ class UIEffects:
     def stop_loading_animation(self):
         """Stop the loading animation."""
         if self._loading_stop_event:
-            if self.console._live:
-                self.console._live.update("")
-                self.console._live.stop()
             self._loading_stop_event.set()
         if self._loading_thread and self._loading_thread.is_alive():
             self._loading_thread.join(timeout=0.5)

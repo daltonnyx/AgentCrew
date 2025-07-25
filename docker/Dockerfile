@@ -59,6 +59,8 @@ RUN apt-get update && apt-get install -y \
   ca-certificates \
   && rm -rf /var/lib/apt/lists/*
 
+RUN pip install --no-cache-dir uv
+
 # Create non-root user
 RUN groupadd -r agentcrew && useradd -r -g agentcrew -m -d /home/agentcrew agentcrew
 
